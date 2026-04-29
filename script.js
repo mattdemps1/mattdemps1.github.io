@@ -13,85 +13,42 @@ const C = { navy:'#1B3A5C', teal:'#2E8B8B', blue:'#5A9FD4', red:'#C7483C', bg:'#
 
   const CX = W / 2, CY = H / 2;
   const colors = {
-    bg: '#121B26',      // Deep slate
-    text: '#E8ECF0',    // Cool white
-    teal: '#3DD9C0',    // Neon teal (Active)
-    blue: '#6BA3E8',    // Electric blue (Substrate)
-    red: '#E85A4F',     // Alert red (Dormant)
-    shell: '#1A242F'    // Shell body
+    bg: '#0F1722',      
+    grid: 'rgba(61, 217, 192, 0.08)', 
+    teal: '#3DD9C0',    
+    shell: '#1E2C3D',   
+    muted: '#4C6A8D',   
+    textDim: 'rgba(232, 236, 240, 0.85)' // Even higher contrast for readability
   };
 
   let activation = 0, fieldAlpha = 0, fieldPhase = 0, holding = false;
-  
-  // ── PARTICLE SYSTEM ───────────────────────────────────────
-  const particles = [];
-  const NUM_PARTICLES = 15;
-  for(let i=0; i<NUM_PARTICLES; i++) {
-    particles.push(resetParticle({ x: Math.random() * W }));
-  }
+  let pulseAlpha = 0;
+  let hasTriggered = false;
 
-  function resetParticle(p = {}) {
-    return {
-      x: p.x ?? -20,
-      y: p.y ?? (CY - 40 + Math.random() * 80),
-      vx: 1.2 + Math.random() * 0.8,
-      vy: (Math.random() - 0.5) * 0.3,
-      state: 0, // 0: substrate, 1: docking, 2: product
-      timer: 0
-    };
-  }
-
-  function updateParticles(dt) {
-    const activeSiteOpen = activation > 0.8;
-    const pocketX = CX + 34; 
-
-    particles.forEach(p => {
-      if (p.state === 0) {
-        p.x += p.vx;
-        p.y += p.vy;
-
-        if (activeSiteOpen) {
-          const dx = pocketX - p.x, dy = CY - p.y;
-          const dist = Math.hypot(dx, dy);
-          if (dist < 40) {
-            p.state = 1;
-            p.timer = 0;
-          }
-        } else {
-          // Blocked: Bounce off the shell
-          const dx = CX - p.x, dy = CY - p.y;
-          if (Math.hypot(dx, dy) < 55 && p.x < CX) {
-            p.vx = -Math.abs(p.vx);
-            p.x += p.vx * 2;
-          }
-        }
-      } else if (p.state === 1) {
-        // Docked and being catalyzed
-        p.x = pocketX;
-        p.y = CY;
-        p.timer += dt;
-        if (p.timer > 600 || !activeSiteOpen) {
-          p.state = 2; // Eject
-          p.vx = 2.5 + Math.random() * 1.5;
-          p.vy = (Math.random() - 0.5) * 1.0;
-        }
-      } else if (p.state === 2) {
-        p.x += p.vx;
-        p.y += p.vy;
-      }
-
-      if (p.x > W + 20 || p.x < -40) {
-        Object.assign(p, resetParticle());
-      }
-    });
+  function drawGrid() {
+    ctx.strokeStyle = colors.grid;
+    ctx.lineWidth = 1;
+    const size = 30;
+    for(let x=0; x<=W+size; x+=size) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for(let y=0; y<=H+size; y+=size) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
   }
 
   function drawField() {
     if (fieldAlpha < 0.01) return;
     ctx.save();
-    // Professional scan speed
-    const scanX = (fieldPhase * 300) % (W + 300) - 150;
-    ctx.strokeStyle = `rgba(61,217,192,${fieldAlpha * 0.5})`;
+    // Tighter scan period for faster reset: starts closer to edges
+    const period = W + 100;
+    const speed = 350;
+    const scanX = (fieldPhase * speed) % period - 50;
+    
+    const grad = ctx.createLinearGradient(scanX - 80, 0, scanX, 0);
+    grad.addColorStop(0, 'transparent');
+    grad.addColorStop(1, `rgba(61, 217, 192, ${fieldAlpha * 0.2})`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(scanX - 80, 0, 80, H);
+
+    ctx.strokeStyle = `rgba(61,217,192,${fieldAlpha * 0.7})`;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(scanX, 0); ctx.lineTo(scanX, H);
@@ -99,18 +56,29 @@ const C = { navy:'#1B3A5C', teal:'#2E8B8B', blue:'#5A9FD4', red:'#C7483C', bg:'#
     ctx.restore();
   }
 
-  function drawMolecule(t) {
+  function drawMolecule(t, dt) {
     const r1 = 45, d = 34, r2 = t * 32;
     ctx.save();
     ctx.translate(CX, CY);
 
-    // Active Site (Solid high-contrast surface)
+    // 1. Draw Revealed Active Core
     if (t > 0.01) {
       ctx.fillStyle = colors.teal;
-      ctx.beginPath(); ctx.arc(0, 0, r1 - 3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath();
+      ctx.arc(0, 0, r1 - 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Subtle Precision Pulse Effect
+      pulseAlpha += dt * 0.0015;
+      const p = pulseAlpha % 1;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.5 * (1 - p) * t})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(d, 0, 5 + p * 30, 0, Math.PI * 2);
+      ctx.stroke();
     }
 
-    // Protective Shell
+    // 2. Draw Shell (Pocket Reveal)
     ctx.beginPath();
     if (r2 > 0 && d + r2 > r1) {
       const x = (d*d - r2*r2 + r1*r1) / (2*d);
@@ -125,57 +93,70 @@ const C = { navy:'#1B3A5C', teal:'#2E8B8B', blue:'#5A9FD4', red:'#C7483C', bg:'#
     ctx.closePath();
     ctx.fillStyle = colors.shell;
     ctx.fill();
-    ctx.strokeStyle = t > 0.5 ? colors.teal : colors.red;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.restore();
-  }
 
-  function drawParticle(p) {
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    // Medical capsule/sphere look
-    ctx.fillStyle = (p.state === 2) ? colors.teal : colors.blue;
-    ctx.beginPath();
-    ctx.arc(0, 0, 5, 0, Math.PI * 2);
-    ctx.fill();
+    // 3. High-Precision Outer Stroke
+    ctx.strokeStyle = t > 0.5 ? colors.teal : colors.muted;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
     ctx.restore();
   }
 
   function drawHUD(t) {
-    ctx.font = "600 10px 'DM Mono', monospace";
+    ctx.font = "700 13px 'DM Mono', monospace";
     ctx.textAlign = 'center';
-    ctx.fillStyle = t > 0.8 ? colors.teal : colors.red;
-    ctx.fillText(t > 0.8 ? "CATALYSIS: ACTIVE" : "CATALYSIS: DORMANT", W / 2, 45);
+    ctx.fillStyle = t > 0.8 ? colors.teal : colors.textDim;
+    ctx.fillText(t > 0.8 ? "MOLECULAR SWITCH: ACTIVE" : "MOLECULAR SWITCH: INACTIVE", W / 2, 45);
   }
 
   let last = 0;
   function loop(ts) {
     const dt = last ? ts - last : 0; last = ts;
+    
+    // Field visualization
     if (holding) { 
-      fieldAlpha = Math.min(1, fieldAlpha + 0.06); 
-      activation = Math.min(1, activation + 0.03); 
+      fieldAlpha = Math.min(1, fieldAlpha + 0.08); 
     } else { 
-      fieldAlpha = Math.max(0, fieldAlpha - 0.05); 
-      activation = Math.max(0, activation - 0.04); 
+      fieldAlpha = Math.max(0, fieldAlpha - 0.2); // Fast fade
     }
     fieldPhase += dt * 0.001;
 
+    // Trigger Logic: Only activate when a field line is passing over the center (CX)
+    let isHit = false;
+    const period = W + 100;
+    const speed = 350;
+    const scanX = (fieldPhase * speed) % period - 50;
+    if (Math.abs(scanX - CX) < 60) isHit = true;
+
+    if (holding) {
+      if (isHit) hasTriggered = true;
+      if (hasTriggered) {
+        activation = Math.min(1, activation + 0.1); 
+      }
+    } else {
+      hasTriggered = false;
+      activation = Math.max(0, activation - 0.05); 
+    }
+
     ctx.fillStyle = colors.bg; ctx.fillRect(0, 0, W, H);
+    drawGrid();
     drawField();
-    updateParticles(dt);
-    particles.forEach(drawParticle);
-    drawMolecule(activation);
+    drawMolecule(activation, dt);
     drawHUD(activation);
 
-    lbl.textContent = activation > 0.8 ? 'Field Applied — Switch Open' : 'Field Inactive — Switch Closed';
-    lbl.style.color = activation > 0.8 ? colors.teal : colors.red;
+    lbl.textContent = activation > 0.8 ? 'Field ON' : 'Field Off';
+    lbl.style.color = activation > 0.8 ? colors.teal : colors.textDim;
     requestAnimationFrame(loop);
   }
 
-  btn.addEventListener('mousedown', () => holding = true);
+  const startHolding = () => {
+    holding = true;
+    fieldPhase = 0; // Reset to start scan from left
+  };
+
+  btn.addEventListener('mousedown', startHolding);
   window.addEventListener('mouseup', () => holding = false);
-  btn.addEventListener('touchstart', (e) => { e.preventDefault(); holding = true; });
+  btn.addEventListener('touchstart', (e) => { e.preventDefault(); startHolding(); });
   window.addEventListener('touchend', () => holding = false);
   requestAnimationFrame(loop);
 })();

@@ -97,10 +97,15 @@
 
     /* DEMO BOXES */
     .demo-box { background:white; border:1px solid var(--border); border-radius:6px; overflow:hidden; box-shadow:0 4px 24px rgba(27,58,92,0.06); }
-    .demo-box.theme-dark { background: var(--bg); border-color: var(--border); }
+    .demo-box.theme-dark { background: var(--dark-bg); border-color: rgba(232,236,240,0.1); }
+    .demo-box.theme-dark .demo-label { background: rgba(255,255,255,0.03); border-bottom-color: rgba(232,236,240,0.1); color: rgba(232,236,240,0.7); }
+    .demo-box.theme-dark .mb-state-area { border-top-color: rgba(232,236,240,0.1) !important; }
+    .demo-box.theme-dark #mbStateLabel { color: rgba(232,236,240,0.6) !important; }
+    
     .demo-label { font-family:var(--mono); font-size:0.58rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); padding:0.6rem 1rem; border-bottom:1px solid var(--border); background:var(--bg2); display:flex; align-items:center; justify-content:space-between; }
     .demo-live { color:var(--teal); }
-    canvas { display:block; }
+    .demo-ref { font-family:var(--mono); font-size:0.5rem; background:rgba(61,217,192,0.1); color:var(--dark-teal); padding:0.15rem 0.4rem; border-radius:2px; letter-spacing:0.05em; }
+    canvas { display:block; width: 100%; height: auto; }
 
     /* MOLECULAR BIT SPECIFIC */
     .mb-banner { background:var(--navy); color:white; border-radius:5px; padding:0.5rem 1rem; font-family:var(--mono); font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:2rem; display:inline-flex; align-items:center; gap:0.5rem; }
