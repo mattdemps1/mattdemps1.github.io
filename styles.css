@@ -97,6 +97,7 @@
 
     /* DEMO BOXES */
     .demo-box { background:white; border:1px solid var(--border); border-radius:6px; overflow:hidden; box-shadow:0 4px 24px rgba(27,58,92,0.06); }
+    .demo-box.theme-dark { background: var(--bg); border-color: var(--border); }
     .demo-label { font-family:var(--mono); font-size:0.58rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); padding:0.6rem 1rem; border-bottom:1px solid var(--border); background:var(--bg2); display:flex; align-items:center; justify-content:space-between; }
     .demo-live { color:var(--teal); }
     canvas { display:block; }

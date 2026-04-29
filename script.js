@@ -2,123 +2,182 @@
 const C = { navy:'#1B3A5C', teal:'#2E8B8B', blue:'#5A9FD4', red:'#C7483C', bg:'#F5F3F0', bg2:'#ECEAE6', muted:'#5a5a5a', text:'#1a1a1a', white:'#ffffff', border:'rgba(27,58,92,0.12)' };
 
 /* ══════════════════════════════════════════════════════
-   DEMO 1 — MOLECULAR BIT: high-fidelity transistor simulation
+   DEMO 1 — MOLECULAR BIT: controllable protein switch
 ══════════════════════════════════════════════════════ */
 (function(){
   const canvas = document.getElementById('mbCanvas');
-  const ctx = canvas.getContext('2d');
+  const ctx    = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   const btn = document.getElementById('mbToggle');
   const lbl = document.getElementById('mbStateLabel');
 
-  let activation = 0, target = 0;
+  const CX = W / 2, CY = H / 2;
+  const colors = {
+    bg: '#121B26',      // Deep slate
+    text: '#E8ECF0',    // Cool white
+    teal: '#3DD9C0',    // Neon teal (Active)
+    blue: '#6BA3E8',    // Electric blue (Substrate)
+    red: '#E85A4F',     // Alert red (Dormant)
+    shell: '#1A242F'    // Shell body
+  };
 
-  // Mechanical parameters
-  const R = 100, ANC = -R, LNK = 65, HNG = ANC - LNK, SWL = 65;
-  const REST_ANGLE = 155 * Math.PI / 180;
-
-  function hexToRgb(h) {
-    let hex = h.trim();
-    if (hex.length === 4) {
-      hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
-    }
-    const r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
-    return [r, g, b];
+  let activation = 0, fieldAlpha = 0, fieldPhase = 0, holding = false;
+  
+  // ── PARTICLE SYSTEM ───────────────────────────────────────
+  const particles = [];
+  const NUM_PARTICLES = 15;
+  for(let i=0; i<NUM_PARTICLES; i++) {
+    particles.push(resetParticle({ x: Math.random() * W }));
   }
 
-  function drawPill(len, col, w) {
-    ctx.beginPath();
-    ctx.arc(0, 0, w/2, 0, Math.PI);
-    ctx.lineTo(-w/2, -len);
-    ctx.arc(0, -len, w/2, Math.PI, 0);
-    ctx.closePath();
-    ctx.fillStyle = col;
-    ctx.fill();
+  function resetParticle(p = {}) {
+    return {
+      x: p.x ?? -20,
+      y: p.y ?? (CY - 40 + Math.random() * 80),
+      vx: 1.2 + Math.random() * 0.8,
+      vy: (Math.random() - 0.5) * 0.3,
+      state: 0, // 0: substrate, 1: docking, 2: product
+      timer: 0
+    };
   }
 
-  function drawRtpa(x, y, scale) {
+  function updateParticles(dt) {
+    const activeSiteOpen = activation > 0.8;
+    const pocketX = CX + 34; 
+
+    particles.forEach(p => {
+      if (p.state === 0) {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (activeSiteOpen) {
+          const dx = pocketX - p.x, dy = CY - p.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 40) {
+            p.state = 1;
+            p.timer = 0;
+          }
+        } else {
+          // Blocked: Bounce off the shell
+          const dx = CX - p.x, dy = CY - p.y;
+          if (Math.hypot(dx, dy) < 55 && p.x < CX) {
+            p.vx = -Math.abs(p.vx);
+            p.x += p.vx * 2;
+          }
+        }
+      } else if (p.state === 1) {
+        // Docked and being catalyzed
+        p.x = pocketX;
+        p.y = CY;
+        p.timer += dt;
+        if (p.timer > 600 || !activeSiteOpen) {
+          p.state = 2; // Eject
+          p.vx = 2.5 + Math.random() * 1.5;
+          p.vy = (Math.random() - 0.5) * 1.0;
+        }
+      } else if (p.state === 2) {
+        p.x += p.vx;
+        p.y += p.vy;
+      }
+
+      if (p.x > W + 20 || p.x < -40) {
+        Object.assign(p, resetParticle());
+      }
+    });
+  }
+
+  function drawField() {
+    if (fieldAlpha < 0.01) return;
     ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(scale, scale);
+    // Professional scan speed
+    const scanX = (fieldPhase * 300) % (W + 300) - 150;
+    ctx.strokeStyle = `rgba(61,217,192,${fieldAlpha * 0.5})`;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    const spikes = 10;
-    for(let i=0; i<spikes*2; i++) {
-      let r = (i%2 === 0) ? 45 : 25;
-      let angle = (i * Math.PI) / spikes;
-      ctx.lineTo(Math.cos(angle)*r, Math.sin(angle)*r);
-    }
-    ctx.closePath();
-    ctx.fillStyle = '#E85A4F';
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(0,0,12,0,Math.PI*2); ctx.fill();
-    ctx.restore();
-  }
-
-  function loop() {
-    activation += (target - activation) * 0.12;
-    ctx.clearRect(0, 0, W, H);
-
-    const teal = '#3DD9C0';
-    const blue = '#6BA3E8';
-    const navy = '#1B3A5C';
-
-    ctx.save();
-    ctx.translate(W/2, H/2 + 50);
-    ctx.scale(0.8, 0.8);
-
-    if (activation > 0.01) {
-      const [r, g, b] = hexToRgb(teal);
-      const grd = ctx.createRadialGradient(0, 0, R, 0, 0, R + 40);
-      grd.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${0.4 * activation})`);
-      grd.addColorStop(1, 'transparent');
-      ctx.beginPath(); ctx.arc(0, 0, R + 40, 0, Math.PI*2); ctx.fillStyle = grd; ctx.fill();
-    }
-
-    ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI*2);
-    ctx.fillStyle = '#1a242f'; ctx.fill();
-    ctx.strokeStyle = activation > 0.5 ? teal : blue;
-    ctx.lineWidth = 3; ctx.stroke();
-
-    ctx.beginPath(); ctx.arc(0, 0, R*0.5, 0, Math.PI*2);
-    ctx.strokeStyle = activation > 0.8 ? teal : 'rgba(255,255,255,0.1)';
+    ctx.moveTo(scanX, 0); ctx.lineTo(scanX, H);
     ctx.stroke();
+    ctx.restore();
+  }
 
+  function drawMolecule(t) {
+    const r1 = 45, d = 34, r2 = t * 32;
     ctx.save();
-    ctx.translate(0, ANC);
-    drawPill(LNK, blue, 18);
-    ctx.restore();
+    ctx.translate(CX, CY);
 
-    const angle = REST_ANGLE * (1 - activation);
-    ctx.save();
-    ctx.translate(0, HNG);
-    ctx.rotate(angle);
-    drawRtpa(0, -SWL - 10, 0.3);
-    drawPill(SWL, teal, 18);
-    ctx.restore();
-
-    ctx.beginPath(); ctx.arc(0, HNG, 12, 0, Math.PI*2); ctx.fillStyle = '#2c3e50'; ctx.fill();
-    ctx.beginPath(); ctx.arc(0, ANC, 10, 0, Math.PI*2); ctx.fillStyle = navy; ctx.fill();
-
-    ctx.restore();
-
-    if (activation > 0.8) {
-      lbl.textContent = 'Drug State: ACTIVATED (Field Applied)';
-      lbl.style.color = teal;
-    } else {
-      lbl.textContent = 'Drug State: Inactive (Safe)';
-      lbl.style.color = '';
+    // Active Site (Solid high-contrast surface)
+    if (t > 0.01) {
+      ctx.fillStyle = colors.teal;
+      ctx.beginPath(); ctx.arc(0, 0, r1 - 3, 0, Math.PI * 2); ctx.fill();
     }
 
+    // Protective Shell
+    ctx.beginPath();
+    if (r2 > 0 && d + r2 > r1) {
+      const x = (d*d - r2*r2 + r1*r1) / (2*d);
+      const y = Math.sqrt(Math.max(0, r1*r1 - x*x));
+      const a1 = Math.atan2(y, x), a2 = Math.atan2(y, x - d);
+      ctx.arc(0, 0, r1, a1, 2 * Math.PI - a1, false);
+      ctx.arc(d, 0, r2, 2 * Math.PI - a2, a2, true);
+    } else {
+      ctx.arc(0, 0, r1, 0, 2 * Math.PI, false);
+      if (r2 > 0) { ctx.moveTo(d + r2, 0); ctx.arc(d, 0, r2, 0, 2 * Math.PI, true); }
+    }
+    ctx.closePath();
+    ctx.fillStyle = colors.shell;
+    ctx.fill();
+    ctx.strokeStyle = t > 0.5 ? colors.teal : colors.red;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawParticle(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    // Medical capsule/sphere look
+    ctx.fillStyle = (p.state === 2) ? colors.teal : colors.blue;
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawHUD(t) {
+    ctx.font = "600 10px 'DM Mono', monospace";
+    ctx.textAlign = 'center';
+    ctx.fillStyle = t > 0.8 ? colors.teal : colors.red;
+    ctx.fillText(t > 0.8 ? "CATALYSIS: ACTIVE" : "CATALYSIS: DORMANT", W / 2, 45);
+  }
+
+  let last = 0;
+  function loop(ts) {
+    const dt = last ? ts - last : 0; last = ts;
+    if (holding) { 
+      fieldAlpha = Math.min(1, fieldAlpha + 0.06); 
+      activation = Math.min(1, activation + 0.03); 
+    } else { 
+      fieldAlpha = Math.max(0, fieldAlpha - 0.05); 
+      activation = Math.max(0, activation - 0.04); 
+    }
+    fieldPhase += dt * 0.001;
+
+    ctx.fillStyle = colors.bg; ctx.fillRect(0, 0, W, H);
+    drawField();
+    updateParticles(dt);
+    particles.forEach(drawParticle);
+    drawMolecule(activation);
+    drawHUD(activation);
+
+    lbl.textContent = activation > 0.8 ? 'Field Applied — Switch Open' : 'Field Inactive — Switch Closed';
+    lbl.style.color = activation > 0.8 ? colors.teal : colors.red;
     requestAnimationFrame(loop);
   }
 
-  btn.addEventListener('mousedown', () => { target = 1; btn.textContent = 'Field Active'; });
-  window.addEventListener('mouseup', () => { target = 0; btn.textContent = 'Apply Field →'; });
-  btn.addEventListener('touchstart', (e) => { e.preventDefault(); target = 1; btn.textContent = 'Field Active'; });
-  btn.addEventListener('touchend', () => { target = 0; btn.textContent = 'Apply Field →'; });
-
-  loop();
+  btn.addEventListener('mousedown', () => holding = true);
+  window.addEventListener('mouseup', () => holding = false);
+  btn.addEventListener('touchstart', (e) => { e.preventDefault(); holding = true; });
+  window.addEventListener('touchend', () => holding = false);
+  requestAnimationFrame(loop);
 })();
 
 /* ══════════════════════════════════════════════════════
