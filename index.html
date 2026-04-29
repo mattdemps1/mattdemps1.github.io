@@ -5,820 +5,199 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Matthew Dempsey</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0a0c0f;
-      --bg2: #0f1318;
-      --bg3: #141920;
-      --border: rgba(255,255,255,0.07);
-      --accent: #5af0c4;
-      --accent2: #3a7bd5;
-      --text: #e8eaed;
-      --muted: #6b7280;
-      --serif: 'Playfair Display', Georgia, serif;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'IBM Plex Sans', sans-serif;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      font-weight: 300;
-      line-height: 1.7;
-      overflow-x: hidden;
-    }
-
-    /* ── NOISE OVERLAY ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 1000;
-      opacity: 0.4;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem 3rem;
-      background: rgba(10,12,15,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-name {
-      font-family: var(--mono);
-      font-size: 0.8rem;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      text-transform: uppercase;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-decoration: none;
-      text-transform: uppercase;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--text); }
-
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      padding: 8rem 3rem 4rem;
-      gap: 4rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::after {
-      content: '';
-      position: absolute;
-      top: -200px; right: -200px;
-      width: 700px; height: 700px;
-      background: radial-gradient(circle, rgba(90,240,196,0.06) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .hero-left { animation: fadeUp 0.9s ease both; }
-
-    .hero-eyebrow {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.2em;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .hero-eyebrow::before {
-      content: '';
-      display: inline-block;
-      width: 2rem;
-      height: 1px;
-      background: var(--accent);
-    }
-
-    h1 {
-      font-family: var(--serif);
-      font-size: clamp(3rem, 6vw, 5.5rem);
-      font-weight: 400;
-      line-height: 1.05;
-      letter-spacing: -0.01em;
-      margin-bottom: 1.5rem;
-    }
-
-    h1 em {
-      font-style: italic;
-      color: var(--accent);
-    }
-
-    .hero-sub {
-      font-size: 1.05rem;
-      color: var(--muted);
-      max-width: 440px;
-      margin-bottom: 2.5rem;
-      line-height: 1.8;
-    }
-
-    .hero-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 2.5rem;
-    }
-
-    .tag {
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.08em;
-      padding: 0.3rem 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .hero-cta {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      text-decoration: none;
-      padding: 0.75rem 1.75rem;
-      border-radius: 2px;
-      transition: all 0.2s;
-      display: inline-block;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #0a0c0f;
-      font-weight: 500;
-    }
-
-    .btn-primary:hover { background: #7df5d3; }
-
-    .btn-ghost {
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-
-    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* ── HERO RIGHT: molecule diagram ── */
-    .hero-visual {
-      animation: fadeUp 0.9s 0.2s ease both;
-      position: relative;
-    }
-
-    .molecule-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .molecule-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(90,240,196,0.04) 0%, transparent 60%);
-    }
-
-    .state-row {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 1rem;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .state-box {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 1.25rem;
-      text-align: center;
-    }
-
-    .state-label {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-
-    .state-label.off { color: var(--muted); }
-    .state-label.on { color: var(--accent); }
-
-    .state-desc {
-      font-size: 0.78rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .arrow-center {
-      text-align: center;
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      color: var(--accent);
-      letter-spacing: 0.05em;
-    }
-
-    .arrow-center .arrow-icon {
-      font-size: 1.2rem;
-      display: block;
-      margin-bottom: 0.25rem;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .metric-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0.75rem;
-      border-top: 1px solid var(--border);
-      padding-top: 1.25rem;
-    }
-
-    .metric {
-      text-align: center;
-    }
-
-    .metric-val {
-      font-family: var(--mono);
-      font-size: 1.1rem;
-      color: var(--accent);
-      display: block;
-      margin-bottom: 0.2rem;
-    }
-
-    .metric-key {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    .card-badge {
-      position: absolute;
-      top: 1rem; right: 1rem;
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      text-transform: uppercase;
-      border: 1px solid rgba(90,240,196,0.3);
-      padding: 0.2rem 0.5rem;
-      border-radius: 2px;
-    }
-
-    /* ── SECTIONS ── */
-    section {
-      padding: 6rem 3rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .section-label {
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.2em;
-      color: var(--accent);
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 3rem;
-    }
-
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    h2 {
-      font-family: var(--serif);
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      font-weight: 400;
-      line-height: 1.15;
-      margin-bottom: 1.5rem;
-    }
-
-    /* ── MOLECULAR BIT ── */
-    .project-hero {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 3rem;
-      margin-bottom: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .project-hero::before {
-      content: '';
-      position: absolute;
-      bottom: -100px; right: -100px;
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(58,123,213,0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .project-title {
-      font-family: var(--serif);
-      font-size: 2.2rem;
-      font-weight: 400;
-      margin-bottom: 0.5rem;
-    }
-
-    .project-oneliner {
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      color: var(--accent);
-      margin-bottom: 1.5rem;
-    }
-
-    .project-body {
-      font-size: 0.95rem;
-      color: var(--muted);
-      max-width: 680px;
-      line-height: 1.9;
-      margin-bottom: 2rem;
-    }
-
-    .phase-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 2rem;
-    }
-
-    .phase {
-      background: var(--bg3);
-      padding: 1.25rem;
-    }
-
-    .phase-num {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.15em;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-
-    .phase-name {
-      font-size: 0.82rem;
-      font-weight: 500;
-      margin-bottom: 0.4rem;
-      color: var(--text);
-    }
-
-    .phase-detail {
-      font-size: 0.75rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .collab-strip {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .collab-pill {
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      padding: 0.3rem 0.8rem;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      color: var(--muted);
-    }
-
-    /* ── OTHER WORK ── */
-    .work-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .work-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 1.75rem;
-      transition: border-color 0.2s;
-    }
-
-    .work-card:hover { border-color: rgba(90,240,196,0.3); }
-
-    .work-card-tag {
-      font-family: var(--mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.12em;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-    }
-
-    .work-card h3 {
-      font-family: var(--serif);
-      font-size: 1.2rem;
-      font-weight: 400;
-      margin-bottom: 0.6rem;
-    }
-
-    .work-card p {
-      font-size: 0.85rem;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-
-    /* ── ACHIEVEMENTS ── */
-    .achieve-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0px;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    .achieve-item {
-      display: grid;
-      grid-template-columns: 3rem 1fr;
-      align-items: start;
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border);
-      gap: 1.25rem;
-      transition: background 0.2s;
-    }
-
-    .achieve-item:last-child { border-bottom: none; }
-    .achieve-item:hover { background: var(--bg2); }
-
-    .achieve-num {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      color: var(--accent);
-      padding-top: 0.2rem;
-    }
-
-    .achieve-title {
-      font-weight: 500;
-      font-size: 0.95rem;
-      margin-bottom: 0.3rem;
-    }
-
-    .achieve-desc {
-      font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    /* ── LINKS ── */
-    .links-section {
-      border-top: 1px solid var(--border);
-      padding-top: 4rem;
-    }
-
-    .links-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
-
-    .link-card {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      padding: 1.25rem;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-
-    .link-card:hover { border-color: var(--accent); }
-
-    .link-card-type {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.15em;
-      color: var(--accent);
-      text-transform: uppercase;
-    }
-
-    .link-card-name {
-      font-size: 0.9rem;
-      color: var(--text);
-    }
-
-    .link-card-url {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem 3rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    footer p {
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-    }
-
-    /* ── ANIMATIONS ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.5; transform: translateX(0); }
-      50% { opacity: 1; transform: translateX(3px); }
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 900px) {
-      nav { padding: 1rem 1.5rem; }
-      .nav-links { gap: 1.25rem; }
-      .hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 3rem; gap: 2.5rem; }
-      section { padding: 4rem 1.5rem; }
-      .phase-grid { grid-template-columns: 1fr 1fr; }
-      .work-grid { grid-template-columns: 1fr; }
-      .links-grid { grid-template-columns: 1fr; }
-      footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
-    }
-
-    @media (max-width: 600px) {
-      .phase-grid { grid-template-columns: 1fr; }
-      .state-row { grid-template-columns: 1fr; }
-      .arrow-center { transform: rotate(90deg); }
-      .metric-row { grid-template-columns: 1fr 1fr; }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav>
-    <span class="nav-name">M. Dempsey</span>
-    <ul class="nav-links">
-      <li><a href="#project">Project</a></li>
-      <li><a href="#work">Work</a></li>
-      <li><a href="#achievements">Achievements</a></li>
-      <li><a href="#links">Links</a></li>
-    </ul>
-  </nav>
+<nav>
+  <span class="nav-name">Matthew Dempsey</span>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#molecular-bit">Projects</a></li>
+    <li><a href="#links">Links</a></li>
+  </ul>
+</nav>
 
-  <!-- HERO -->
+<!-- HERO -->
+<div id="about" style="border-bottom:1px solid var(--border);">
   <div class="hero">
     <div class="hero-left">
       <div class="hero-eyebrow">Indiana University · Class of 2028</div>
       <h1>Matthew<br><em>Dempsey</em></h1>
-      <p class="hero-sub">
-        Building at the intersection of generative AI, protein engineering, and autonomous systems. Currently: designing proteins that switch on command.
-      </p>
+      <p class="hero-sub">Building at the intersection of generative AI, protein engineering, and autonomous systems.</p>
       <div class="hero-tags">
         <span class="tag">Computational Biology</span>
         <span class="tag">Generative AI</span>
-        <span class="tag">Autonomous Systems</span>
         <span class="tag">Protein Design</span>
+        <span class="tag">Autonomous Systems</span>
       </div>
       <div class="hero-cta">
-        <a href="#project" class="btn btn-primary">See the Project</a>
+        <a href="#molecular-bit" class="btn btn-primary">Featured Project</a>
         <a href="mailto:mattdemp@iu.edu" class="btn btn-ghost">Get in touch</a>
       </div>
     </div>
+    <div class="hero-card">
+      <div class="card-header">
+        <span class="card-title">What I'm Building</span>
+        <span class="card-status">Active Research</span>
+      </div>
+      <div class="impact-item"><div class="impact-dot"></div><div class="impact-text"><strong>Protein therapeutics have no off switch.</strong> Once administered, there's no external way to control them.</div></div>
+      <div class="impact-item"><div class="impact-dot"></div><div class="impact-text"><strong>I'm building a platform to change that</strong> — biological systems switchable from outside the body, wirelessly.</div></div>
+      <div class="impact-item"><div class="impact-dot"></div><div class="impact-text"><strong>Computational-first.</strong> Generative AI designs candidates; physics simulation screens them before any synthesis.</div></div>
+      <div class="card-footer">
+        <div class="stat"><span class="stat-val">Gen 2</span><span class="stat-key">Candidate Pool</span></div>
+        <div class="stat"><span class="stat-val">100s/day</span><span class="stat-key">Designs Screened</span></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <div class="hero-visual">
-      <div class="molecule-card">
-        <span class="card-badge">Live Research</span>
-        <div class="state-row">
-          <div class="state-box">
-            <div class="state-label off">OFF State</div>
-            <div class="state-desc">Switching domain bound to nanoparticle surface via electrostatics. Protein inactive.</div>
-          </div>
-          <div class="arrow-center">
-            <span class="arrow-icon">→</span>
-            <span style="font-size:0.6rem;color:var(--muted);">MENP<br>field</span>
-          </div>
-          <div class="state-box">
-            <div class="state-label on">ON State</div>
-            <div class="state-desc">Magnetic field drives electric transduction. Domain releases. Protein activates.</div>
-          </div>
-        </div>
-        <div class="metric-row">
-          <div class="metric">
-            <span class="metric-val">~10nm</span>
-            <span class="metric-key">Debye Length</span>
-          </div>
-          <div class="metric">
-            <span class="metric-val">50–200 Oe</span>
-            <span class="metric-key">Field Range</span>
-          </div>
-          <div class="metric">
-            <span class="metric-val">Wireless</span>
-            <span class="metric-key">Actuation</span>
-          </div>
+<!-- ═══════════════════════════ MOLECULAR BIT ═══════════════════════════ -->
+<div class="section-wrap" id="molecular-bit">
+  <div class="section-label">Featured Project</div>
+  <div class="mb-banner"><span class="mb-dot"></span> Active Research · 3rd Place Cheng Wu Innovation Challenge</div>
+  <h2>Molecular Bit</h2>
+  <p class="section-intro">A platform for <strong>engineered protein conformational switching</strong> — enabling a new category of therapeutics switchable from outside the body via <strong>external field actuation</strong>.</p>
+
+  <div class="project-split" style="margin-bottom:3rem;">
+    <div class="project-text">
+      <p class="proj-tag">The Thesis</p>
+      <p>Most biologically active proteins work like a light with no switch — once present, they're on. There's no remote control for biology.</p>
+      <p>Molecular Bit is a platform for designing proteins engineered to exist in two stable conformational states and to toggle between them in response to an external field. This allows for temporal and spatial control of protein activity without additional drugs or genetic modification.</p>
+      <p>The development cycle is <strong>computational-first</strong>: generative AI proposes candidates, which are then screened through large-scale <strong>molecular dynamics (MD) validation</strong>. Our automated design pipeline evaluates <strong>hundreds of candidates per day</strong>, feeding high-confidence designs into active wet lab planning.</p>
+      <p style="font-family:var(--mono);font-size:0.75rem;color:var(--teal);">→ Status: Second-generation candidates, active wet lab planning.</p>
+    </div>
+    <div>
+      <div class="demo-box theme-dark">
+        <div class="demo-label"><span>Molecular Transistor — Interactive</span><span class="demo-live">● Live</span></div>
+        <canvas id="mbCanvas" width="420" height="300"></canvas>
+        <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="mbStateLabel">OFF — protein closed</span>
+          <button id="mbToggle" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);border:1px solid rgba(232,236,240,0.2);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;font-weight:500;transition:all 0.2s;">Signal</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MOLECULAR BIT -->
-  <section id="project" style="max-width:1200px;margin:0 auto;padding:6rem 3rem;">
-    <div class="section-label">Featured Project</div>
+  <div class="mb-pillars">
+    <div class="pillar"><div class="pillar-icon">🧬</div><div class="pillar-title">Generative Design</div><div class="pillar-desc">AI tools generate novel protein candidates optimized for two-state conformational switching.</div></div>
+    <div class="pillar"><div class="pillar-icon">⚛️</div><div class="pillar-title">Physics Screening</div><div class="pillar-desc">Molecular dynamics evaluates switching dynamics before a single protein is synthesized.</div></div>
+    <div class="pillar"><div class="pillar-icon">🔁</div><div class="pillar-title">Iterative Pipeline</div><div class="pillar-desc">Simulation results feed the next design round. Hundreds of candidates evaluated per day.</div></div>
+  </div>
 
-    <div class="project-hero">
-      <h2 class="project-title">Molecular Bit</h2>
-      <p class="project-oneliner">Wireless, reversible modulation of protein activity using magnetoelectric nanoparticles.</p>
-      <p class="project-body">
-        Molecular Bit is a platform for building proteins that toggle between active and inactive states in response to an externally applied magnetic field — no drugs, no light, no genetic modification required. The system uses magnetoelectric nanoparticles (MENPs) as transducers: a magnetic field drives piezoelectric conversion into a local electric field that disrupts the electrostatic binding holding a designed protein domain against the nanoparticle surface, releasing it into its active conformation. The entire switch is wireless, reversible, and operates under physiological conditions.
-        <br><br>
-        The core infrastructure is in place. We have built an automated protein design pipeline (RFdiffusion → ProteinMPNN → ESMFold → Rosetta screening) and a molecular dynamics tool that evaluates candidates across three phases: equilibration in the OFF state, field-driven switching dynamics, and return verification. We are currently running our second-generation candidate pool, evaluating hundreds of designs per day.
-      </p>
+  <div class="app-strip">
+    <div class="app-card"><div class="app-card-title">Precision Drug Delivery</div><div class="app-card-desc">Therapeutics that activate only at the target site — not systemically.</div></div>
+    <div class="app-card"><div class="app-card-title">Physician-Controlled Biologics</div><div class="app-card-desc">Treatments a clinician can externally modulate after administration.</div></div>
+    <div class="app-card"><div class="app-card-title">Programmable Biological Gating</div><div class="app-card-desc">A general platform for controlling when and where biological processes fire.</div></div>
+  </div>
+</div>
 
-      <div class="phase-grid">
-        <div class="phase">
-          <div class="phase-num">Phase 01</div>
-          <div class="phase-name">Computational Design</div>
-          <div class="phase-detail">Generative AI pipeline + MD screening. Ranked candidates with free-energy profiles.</div>
-        </div>
-        <div class="phase">
-          <div class="phase-num">Phase 02</div>
-          <div class="phase-name">Expression & Validation</div>
-          <div class="phase-detail">20 candidates synthesized. Proxy surface screening to de-risk full MENP integration.</div>
-        </div>
-        <div class="phase">
-          <div class="phase-num">Phase 03</div>
-          <div class="phase-name">MENP Integration</div>
-          <div class="phase-detail">Real magnetic field testing. 50+ switching cycles per lead. Performance characterization.</div>
-        </div>
-        <div class="phase">
-          <div class="phase-num">Phase 04</div>
-          <div class="phase-name">Functional Gating</div>
-          <div class="phase-detail">Field-driven control of protease cleavage. Proof of generalizable biological gating.</div>
-        </div>
-      </div>
+<hr class="full-divider" />
 
-      <div style="margin-bottom:1.25rem;">
-        <div class="section-label" style="margin-bottom:0.75rem;font-size:0.62rem;">Advisors & Collaborators</div>
-        <div class="collab-strip">
-          <span class="collab-pill">Prof. Jared Lewis · IU Chemistry (Packard Fellow, trained under Frances Arnold)</span>
-          <span class="collab-pill">Michael Holden · Former Principal Scientist, Regeneron</span>
-          <span class="collab-pill">Scott Frank · VP Synthetic Molecule Design, Eli Lilly</span>
-          <span class="collab-pill">Kevin Logan · MD, The Logan Institute</span>
+<!-- ═══════════════════════════ UAV ═══════════════════════════ -->
+<div class="section-wrap" id="uav">
+  <div class="section-label">Autonomous Systems · AIAA SciTech 2026</div>
+  <h2>UAV Predictive Object Tracking</h2>
+  <p class="section-intro">First-authored conference paper. A system that gives drones "object permanence" — predicting where a target is even when they can't see it.</p>
+
+  <div class="project-split">
+    <div>
+      <div class="demo-box theme-dark">
+        <div class="demo-label"><span>Drone Tracking Simulation</span><span class="demo-live">● Live</span></div>
+        <canvas id="uavCanvas" width="420" height="300"></canvas>
+        <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="uavLabel">Target: visible</span>
+          <button id="uavReset" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:var(--bg2);color:var(--navy);border:1px solid var(--border);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Reset</button>
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- OTHER WORK -->
-  <section id="work" style="max-width:1200px;margin:0 auto;padding:6rem 3rem;border-top:1px solid var(--border);">
-    <div class="section-label">Other Work</div>
-    <div class="work-grid">
-      <div class="work-card">
-        <div class="work-card-tag">Protein Engineering</div>
-        <h3>HPC Protein Design Pipeline</h3>
-        <p>Integrated RFdiffusion, LigandMPNN, and AlphaFold 3 into a streamlined HPC-ready workflow for de novo multi-state protein design. Extended LigandMPNN to support multiple conformational states. Packaged for lab-wide use with documentation and automated setup.</p>
-      </div>
-      <div class="work-card">
-        <div class="work-card-tag">Autonomous Systems · Published</div>
-        <h3>UAV Predictive Object Tracking</h3>
-        <p>Developed an object permanence framework for drones that predicts target trajectories when targets leave the camera frame. Fuses vision and IMU data for continuous spatial awareness. Presented at AIAA SciTech Forum 2026, Orlando.</p>
-      </div>
-      <div class="work-card">
-        <div class="work-card-tag">Enzyme Design</div>
-        <h3>Enzyme-Switch Cap Domain</h3>
-        <p>Led computational design of a multi-state cap domain for a dirhodium-driven enzyme scaffold. The cap closes in ligand presence to improve substrate selectivity. Automated screening pipeline quantifies ligand exposure across apo and holo states.</p>
-      </div>
-      <div class="work-card">
-        <div class="work-card-tag">Guest Lecture · Dec 2025</div>
-        <h3>Diffusion Models for Protein Design</h3>
-        <p>Delivered a 90-minute lecture for ENGR-E533 Deep Learning Systems at IU on diffusion models as score-based generative systems, with applications in computational protein design.</p>
-      </div>
+    <div class="project-text">
+      <p class="proj-tag">Aerospace Systems Lab · Indiana University</p>
+      <p>Drones lose situational awareness the moment a target disappears behind an obstacle or exits the camera frame. The system I built treats this like a human tracking problem — predicting where the target went, not just where it was.</p>
+      <p>The framework fuses camera data with inertial motion sensors to maintain a continuous target state estimate through visual gaps. When the target reappears, the drone is already pointed in the right direction.</p>
+      <p style="font-family:var(--mono);font-size:0.75rem;color:var(--teal);">→ Presented at AIAA SciTech Forum 2026, Orlando</p>
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- ACHIEVEMENTS -->
-  <section id="achievements" style="max-width:1200px;margin:0 auto;padding:6rem 3rem;border-top:1px solid var(--border);">
-    <div class="section-label">Achievements</div>
-    <div class="achieve-list">
-      <div class="achieve-item">
-        <span class="achieve-num">01</span>
-        <div>
-          <div class="achieve-title">AIAA SciTech Forum 2026 — First-authored conference paper</div>
-          <div class="achieve-desc">Authored and presented original research on localization and predictive control for dynamic object interception on UAVs at the American Institute of Aeronautics and Astronautics forum in Orlando, Florida.</div>
-        </div>
-      </div>
-      <div class="achieve-item">
-        <span class="achieve-num">02</span>
-        <div>
-          <div class="achieve-title">Built a protein design platform used across collaborating labs</div>
-          <div class="achieve-desc">Self-taught state-of-the-art generative AI tools and integrated them into a reusable HPC pipeline. Packaged with clear documentation so researchers across different labs could adopt and extend the workflow without extensive computational background.</div>
-        </div>
-      </div>
-      <div class="achieve-item">
-        <span class="achieve-num">03</span>
-        <div>
-          <div class="achieve-title">Molecular Bit — working prototype infrastructure as a sophomore</div>
-          <div class="achieve-desc">Co-founded and leads computational development of Molecular Bit, a wireless protein-switching platform. Verified operating conditions, built the design pipeline, developed the MD screening tool, and is running second-generation candidates — all while a second-year undergraduate.</div>
-        </div>
-      </div>
-      <div class="achieve-item">
-        <span class="achieve-num">04</span>
-        <div>
-          <div class="achieve-title">NSF RAD-IUB REU Research Intern</div>
-          <div class="achieve-desc">Completed an 8-week NSF-funded program in robotics and aerospace engineering, leading a fully self-directed research project and presenting results at a technical symposium to faculty and peers.</div>
+<hr class="full-divider" />
+
+<!-- ═══════════════════════════ PIPELINE ═══════════════════════════ -->
+<div class="section-wrap" id="pipeline">
+  <div class="section-label">Protein Engineering · Lewis Research Group</div>
+  <h2>HPC Protein Design Pipeline</h2>
+  <p class="section-intro">An automated, lab-wide platform integrating state-of-the-art generative AI tools for de novo multi-state protein design — built and deployed across collaborating labs.</p>
+
+  <div class="project-split">
+    <div class="project-text">
+      <p class="proj-tag">Built & Deployed Lab-Wide</p>
+      <p>Getting cutting-edge protein design tools to actually work together — at scale, reliably, on an HPC cluster — required building the glue that doesn't come in any paper. I integrated the full stack and packaged it with documentation so researchers with no computational background could run it independently.</p>
+      <p>Extended LigandMPNN to support multiple conformational states, enabling designs that hadn't been possible with the stock tool. Automated the full loop: generate → fold predict → score → filter → iterate.</p>
+    </div>
+    <div>
+      <div class="demo-box theme-dark">
+        <div class="demo-label"><span>Design Pipeline — Live Run</span><span class="demo-live">● Simulated</span></div>
+        <canvas id="pipeCanvas" width="420" height="300"></canvas>
+        <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="pipeLabel">Ready</span>
+          <button id="pipeRun" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:var(--teal);color:white;border:none;padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Run Pipeline</button>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- LINKS -->
-  <section id="links" style="max-width:1200px;margin:0 auto;padding:6rem 3rem;border-top:1px solid var(--border);">
-    <div class="section-label">Find Me Online</div>
-    <div class="links-grid">
-      <a href="https://www.linkedin.com/in/matthew-dempsey0" target="_blank" class="link-card">
-        <span class="link-card-type">LinkedIn</span>
-        <span class="link-card-name">Matthew Dempsey</span>
-        <span class="link-card-url">linkedin.com/in/matthew-dempsey0</span>
-      </a>
-      <a href="https://github.com/" target="_blank" class="link-card">
-        <span class="link-card-type">GitHub</span>
-        <span class="link-card-name">Research Repos</span>
-        <span class="link-card-url">github.com/[your-username]</span>
-      </a>
-      <a href="#" target="_blank" class="link-card">
-        <span class="link-card-type">Publication</span>
-        <span class="link-card-name">AIAA SciTech 2026 Paper</span>
-        <span class="link-card-url">UAV Localization & Predictive Control</span>
-      </a>
+<hr class="full-divider" />
+
+<!-- ═══════════════════════════ ENZYME ═══════════════════════════ -->
+<div class="section-wrap" id="enzyme">
+  <div class="section-label">Enzyme Design · Lewis Research Group</div>
+  <h2>Computational Enzyme Switch</h2>
+  <p class="section-intro">Led the computational design of a ligand-responsive cap domain that controls access to an enzyme's active site.</p>
+
+  <div class="project-split">
+    <div>
+      <div class="demo-box theme-dark">
+        <div class="demo-label"><span>Cap Domain — Ligand Binding</span><span class="demo-live">● Interactive</span></div>
+        <canvas id="enzymeCanvas" width="420" height="300"></canvas>
+        <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="enzymeLabel">No ligand — cap open, substrate accessible</span>
+          <button id="enzymeToggle" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:var(--blue);color:white;border:none;padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Add Ligand</button>
+        </div>
+      </div>
     </div>
-  </section>
+    <div class="project-text">
+      <p class="proj-tag">Multi-State Protein Design</p>
+      <p>Designed a cap domain that physically closes over an enzyme's active site when a specific ligand is present — and opens again when it leaves. This gives the enzyme conditional selectivity: it only acts when the cap allows access.</p>
+      <p>Built automated screening tools to quantify ligand exposure across apo (open) and holo (closed) states, combining structural metrics with predicted signals to produce ranked candidate lists.</p>
+    </div>
+  </div>
+</div>
 
-  <!-- FOOTER -->
-  <footer>
-    <p>Matthew Dempsey · Indiana University · mattdemp@iu.edu</p>
-    <p>Intelligent Systems Engineering · Class of 2028</p>
-  </footer>
+<hr class="full-divider" />
 
+<!-- LINKS -->
+<div class="section-wrap" id="links">
+  <div class="section-label">Find Me</div>
+  <div class="links-grid">
+    <a href="https://www.linkedin.com/in/matthew-dempsey0" target="_blank" class="link-card">
+      <span class="link-type">LinkedIn</span><span class="link-name">Matthew Dempsey</span><span class="link-url">linkedin.com/in/matthew-dempsey0</span>
+    </a>
+    <a href="https://news.iu.edu/luddy/live/news/50301-resonix-team-wins-best-ever-cheng-wu-innovation" target="_blank" class="link-card">
+      <span class="link-type">Award</span><span class="link-name">Cheng Wu Innovation Win</span><span class="link-url">news.iu.edu/luddy/resonix</span>
+    </a>
+    <a href="https://www.researchgate.net/publication/400411163_Localization_and_Predictive_Control_for_Dynamic_Object_Interception_on_Lighter-Than-Air_UAVs" target="_blank" class="link-card">
+      <span class="link-type">Publication</span><span class="link-name">AIAA SciTech 2026</span><span class="link-url">Predictive Control for UAVs</span>
+    </a>
+  </div>
+</div>
+
+<footer>
+  <p>Matthew Dempsey · Indiana University · mattdemp@iu.edu</p>
+  <p>Intelligent Systems Engineering · Class of 2028</p>
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
