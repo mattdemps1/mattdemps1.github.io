@@ -186,7 +186,7 @@
   const OBSTACLE = { x: W/2 - 80, y: 50, w: 160, h: 50 }; // Longer left-to-right
   const UAV_START = { x: W/2, y: H - 40 };
   const UAV = { x: UAV_START.x, y: UAV_START.y, vx: 0, vy: 0, angle: 0, state: 'WATCHING', speed: 0, targetX: 0, targetY: 0 };
-  const TARGET_START = { x: -50, y: 75 }; 
+  const TARGET_START = { x: -50, y: 30 }; // Moved above obstacle (y=50)
 
   function targetPos(tt) {
     const x = TARGET_START.x + tt * (W + 100);
@@ -243,23 +243,34 @@
     drawGrid();
 
     const tgt = targetPos(t);
-    const isOccluded = tgt.x > OBSTACLE.x && tgt.x < OBSTACLE.x + OBSTACLE.w;
+    // Visual occlusion zone vs movement trigger zone
+    const isOverObstacle = tgt.x > OBSTACLE.x && tgt.x < OBSTACLE.x + OBSTACLE.w;
+    const triggerX = OBSTACLE.x + (OBSTACLE.w / 3);
+    const inZone = tgt.x > triggerX && tgt.x < OBSTACLE.x + OBSTACLE.w;
 
     // 1. Precise Interception Math
-    const interceptT = (OBSTACLE.x + OBSTACLE.w + 35 - TARGET_START.x) / (W + 100);
-    const interceptPos = targetPos(interceptT);
+    const watchLeadT = t + 0.15; 
+    const exitT = (OBSTACLE.x + OBSTACLE.w + 65 - TARGET_START.x) / (W + 100); 
 
-    if (isOccluded && UAV.state === 'WATCHING') {
+    const activeTargetT = UAV.state === 'WATCHING' ? watchLeadT : UAV.lockedInterceptT;
+    const interceptPos = targetPos(activeTargetT);
+    const finalInterceptPos = targetPos(exitT);
+
+    if (inZone && UAV.state === 'WATCHING') {
       UAV.state = 'INTERCEPTING';
-      UAV.targetX = interceptPos.x;
-      UAV.targetY = interceptPos.y;
-      
+      UAV.lockedInterceptT = exitT;
+      UAV.launchX = UAV.x;
+      UAV.launchY = UAV.y;
+      const dest = targetPos(UAV.lockedInterceptT);
+      UAV.targetX = dest.x;
+      UAV.targetY = dest.y;
+
       const dx = UAV.targetX - UAV.x;
       const dy = UAV.targetY - UAV.y;
       const dist = Math.sqrt(dx*dx + dy*dy);
       UAV.angle = Math.atan2(dy, dx);
-      
-      const timeLeft = (interceptT - t) / SPEED;
+
+      const timeLeft = (UAV.lockedInterceptT - t) / SPEED;
       UAV.speed = dist / timeLeft;
       UAV.vx = Math.cos(UAV.angle) * UAV.speed;
       UAV.vy = Math.sin(UAV.angle) * UAV.speed;
@@ -269,7 +280,7 @@
       const dx = UAV.targetX - UAV.x;
       const dy = UAV.targetY - UAV.y;
       const dist = Math.sqrt(dx*dx + dy*dy);
-      
+
       if (dist > 2) {
         UAV.x += UAV.vx;
         UAV.y += UAV.vy;
@@ -279,32 +290,50 @@
       }
     } else if (UAV.state === 'WATCHING') {
       UAV.angle = Math.atan2(tgt.y - UAV.y, tgt.x - UAV.x);
-      // Update predictive path for visualization
       UAV.targetX = interceptPos.x;
       UAV.targetY = interceptPos.y;
     }
 
-    // 2. Draw Intercept Path (Dotted)
+    // 2. Draw Intercept Path
     if (UAV.state !== 'INTERCEPTED') {
       ctx.save();
-      ctx.setLineDash([5, 5]);
+
+      // 2a. Draw PLANNING line (faint) - Appears when in/near obstacle zone
+      if (isOverObstacle || UAV.state === 'INTERCEPTING') {
+        ctx.setLineDash([2, 4]);
+        ctx.strokeStyle = 'rgba(107, 163, 232, 0.4)';
+        ctx.beginPath();
+        // Back to tethered line from drone to its CURRENT goal (locked or lead)
+        ctx.moveTo(UAV.x, UAV.y);
+        const planGoal = UAV.state === 'INTERCEPTING' ? finalInterceptPos : interceptPos;
+        ctx.lineTo(planGoal.x, planGoal.y);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(planGoal.x, planGoal.y, 3, 0, Math.PI*2);
+        ctx.stroke();
+      }
+
+      // 2b. Draw TRACKING line (From TARGET to lead point, capped at intercept goal)
+      ctx.setLineDash([3, 3]);
       ctx.strokeStyle = colors.blue;
       ctx.lineWidth = 1;
-      ctx.beginPath();
-      // Line from start (or current pos) to target
-      ctx.moveTo(UAV.state === 'INTERCEPTING' ? UAV.x - (UAV.vx * 10) : UAV.x, UAV.state === 'INTERCEPTING' ? UAV.y - (UAV.vy * 10) : UAV.y);
-      ctx.lineTo(UAV.targetX, UAV.targetY);
-      ctx.stroke();
-      
-      // Target Reticle at predicted spot
-      ctx.beginPath();
-      ctx.arc(UAV.targetX, UAV.targetY, 4, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
 
-    // 3. Draw POV
-    drawFOV(UAV.x, UAV.y, UAV.angle, isOccluded);
+      // Cap the tracking lead so it doesn't pass the final exit point
+      const cappedLeadT = Math.min(watchLeadT, exitT);
+      const currentLead = targetPos(cappedLeadT);
+
+      ctx.beginPath();
+      ctx.moveTo(tgt.x, tgt.y);
+      ctx.lineTo(currentLead.x, currentLead.y);
+      ctx.stroke();
+
+      // Lead Reticle
+      ctx.beginPath();
+      ctx.arc(currentLead.x, currentLead.y, 4, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();    }    // 3. Draw POV
+    drawFOV(UAV.x, UAV.y, UAV.angle, isOverObstacle);
 
     // 3. Draw Obstacle (Horizontal Opaque Block)
     ctx.fillStyle = '#1A242F';
@@ -314,25 +343,20 @@
     ctx.strokeRect(OBSTACLE.x, OBSTACLE.y, OBSTACLE.w, OBSTACLE.h);
 
     // 4. Draw Target (Red)
-    if (!isOccluded) {
-      ctx.beginPath();
-      ctx.arc(tgt.x, tgt.y, 6, 0, Math.PI*2);
-      ctx.fillStyle = colors.red;
-      ctx.fill();
-      ctx.strokeStyle = colors.red;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(tgt.x, tgt.y, 11, 0, Math.PI*2);
-      ctx.stroke();
-    } else {
-      ctx.beginPath();
-      ctx.arc(tgt.x, tgt.y, 5, 0, Math.PI*2);
-      ctx.strokeStyle = colors.muted;
-      ctx.setLineDash([3, 3]);
-      ctx.stroke();
-      ctx.setLineDash([]);
+    ctx.save();
+    if (isOverObstacle) {
+      ctx.globalAlpha = 0.35; // Ghost mode
     }
-
+    ctx.beginPath();
+    ctx.arc(tgt.x, tgt.y, 6, 0, Math.PI*2);
+    ctx.fillStyle = isOverObstacle ? colors.muted : colors.red;
+    ctx.fill();
+    ctx.strokeStyle = isOverObstacle ? colors.muted : colors.red;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(tgt.x, tgt.y, 11, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
     // 5. Draw UAV
     drawDrone(UAV.x, UAV.y, UAV.angle);
     ctx.font = `700 9px 'DM Mono', monospace`;
@@ -342,15 +366,18 @@
 
     // 6. HUD
     ctx.font = `700 11px 'DM Mono', monospace`;
-    ctx.fillStyle = isOccluded ? colors.blue : colors.teal;
-    const status = UAV.state === 'WATCHING' ? "STATE: SCANNING" : (isOccluded ? "STATE: PREDICTING" : "STATE: INTERCEPTED");
+    ctx.fillStyle = inZone ? colors.blue : colors.teal;
+    const status = UAV.state === 'WATCHING' ? "STATE: SCANNING" : (UAV.state === 'INTERCEPTING' ? "STATE: PREDICTIVE INTERCEPT" : "STATE: INTERCEPTED");
     ctx.fillText(status, W/2, 45);
 
-    lbl.textContent = isOccluded
-      ? 'Target occluded — executing precision intercept trajectory'
+    lbl.textContent = inZone
+      ? 'Target in interception zone — calculating and executing predictive trajectory'
       : (UAV.state === 'WATCHING' ? 'Visual tracking active' : 'Intercept successfully completed');
 
-    t += SPEED;
+    if (UAV.state !== 'INTERCEPTED') {
+      t += SPEED;
+    }
+    
     if (t > 1) {
       t = 0;
       UAV.x = UAV_START.x; UAV.y = UAV_START.y;
