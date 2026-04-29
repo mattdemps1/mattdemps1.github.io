@@ -7,7 +7,6 @@
       --navy: #1B3A5C;
       --teal: #2E8B8B;
       --blue: #5A9FD4;
-      --red: #C7483C;
       --text: #1a1a1a;
       --muted: #5a5a5a;
       --border: rgba(27,58,92,0.12);
@@ -17,7 +16,6 @@
       --dark-text: #E8ECF0;
       --dark-teal: #3DD9C0;
       --dark-blue: #6BA3E8;
-      --dark-red: #E85A4F;
       --dark-border: rgba(232,236,240,0.1);
 
       --serif: 'Lora', Georgia, serif;
@@ -34,7 +32,6 @@
       --text: var(--dark-text);
       --teal: var(--dark-teal);
       --blue: var(--dark-blue);
-      --red: var(--dark-red);
       --border: var(--dark-border);
       --muted: rgba(232,236,240,0.6);
       background: var(--bg);

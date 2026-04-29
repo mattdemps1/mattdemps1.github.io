@@ -98,17 +98,17 @@
 <!-- ═══════════════════════════ UAV ═══════════════════════════ -->
 <div class="section-wrap" id="uav">
   <div class="section-label">Autonomous Systems · AIAA SciTech 2026</div>
-  <h2>UAV Predictive Object Tracking</h2>
+  <h2>UAV Predictive Interception</h2>
   <p class="section-intro">First-authored conference paper. A system that gives drones "object permanence" — predicting where a target is even when they can't see it.</p>
 
   <div class="project-split">
     <div>
       <div class="demo-box theme-dark">
-        <div class="demo-label"><span>Drone Tracking Simulation</span><span class="demo-live">● Live</span></div>
+        <div class="demo-label"><span>UAV Predictive Interception — Interactive</span></div>
         <canvas id="uavCanvas" width="420" height="300"></canvas>
         <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="uavLabel">Target: visible</span>
-          <button id="uavReset" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:var(--bg2);color:var(--navy);border:1px solid var(--border);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Reset</button>
+          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="uavLabel">STATE: STANDBY</span>
+          <button id="uavReset" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);border:1px solid rgba(232,236,240,0.2);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Reset</button>
         </div>
       </div>
     </div>
@@ -137,11 +137,11 @@
     </div>
     <div>
       <div class="demo-box theme-dark">
-        <div class="demo-label"><span>Design Pipeline — Live Run</span><span class="demo-live">● Simulated</span></div>
+        <div class="demo-label"><span>Automated Design Pipeline — Interactive</span></div>
         <canvas id="pipeCanvas" width="420" height="300"></canvas>
         <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="pipeLabel">Ready</span>
-          <button id="pipeRun" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:var(--teal);color:white;border:none;padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Run Pipeline</button>
+          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="pipeLabel">STATE: STANDBY</span>
+          <button id="pipeRun" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);border:1px solid rgba(232,236,240,0.2);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Run Pipeline</button>
         </div>
       </div>
     </div>
@@ -159,11 +159,11 @@
   <div class="project-split">
     <div>
       <div class="demo-box theme-dark">
-        <div class="demo-label"><span>Cap Domain — Ligand Binding</span><span class="demo-live">● Interactive</span></div>
+        <div class="demo-label"><span>Cap Domain Simulation — Interactive</span></div>
         <canvas id="enzymeCanvas" width="420" height="300"></canvas>
         <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="enzymeLabel">No ligand — cap open, substrate accessible</span>
-          <button id="enzymeToggle" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:var(--blue);color:white;border:none;padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Add Ligand</button>
+          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="enzymeLabel">STATE: STANDBY</span>
+          <button id="enzymeToggle" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);border:1px solid rgba(232,236,240,0.2);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Add Signal</button>
         </div>
       </div>
     </div>
