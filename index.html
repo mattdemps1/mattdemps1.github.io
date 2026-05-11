@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Matthew Dempsey</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -85,41 +85,41 @@
   <div class="mb-banner"><span class="mb-dot"></span> 3rd Place — Cheng Wu Innovation Challenge</div>
   <p class="section-intro">Molecular Bit is building remotely controlled molecular switches for wireless, reversible control of protein activity. The architecture is protein-agnostic — a command layer any therapeutic can plug into. One platform, built to be the foundation molecular robotics gets built on top of.</p>
 
-  <div class="project-split" style="margin-bottom:3rem;">
-    <div class="project-text">
-      <p class="proj-subhead">No off switch.</p>
-      <p>Once a drug is inside your body, you can't control it. It runs at full strength until it's gone. For a headache, that's fine. For a cancer treatment or a brain condition, it isn't.</p>
-      <p>Molecular Bit is a remote control for medicine. The protein is off by default. A physician switches it on, dials it back, or turns it off again — from outside the body, in real time.</p>
+  <div class="mb-text-block">
+    <p class="proj-subhead">No off switch.</p>
+    <p>Once a drug is inside your body, you can't control it. It runs at full strength until it's gone. For a headache, that's fine. For a cancer treatment or a brain condition, it isn't.</p>
+    <p>Molecular Bit is a remote control for medicine. The protein is off by default. A physician switches it on, dials it back, or turns it off again — from outside the body, in real time.</p>
+  </div>
+
+  <div class="demo-box theme-dark" style="margin-bottom:3rem;">
+    <div class="demo-label">
+      <span>Drug Dosage Control — Interactive</span>
+      <span id="mbStateLabel" style="color:rgba(76,106,141,0.85)">off — protein inactive</span>
     </div>
-    <div>
-      <div class="demo-box theme-dark">
-        <div class="demo-label"><span>Molecular Switch — Interactive</span></div>
-        <canvas id="mbCanvas" width="420" height="300"></canvas>
-        <div class="mb-state-area" style="padding:0.75rem 1rem;border-top:1px solid rgba(232,236,240,0.1);display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-family:var(--mono);font-size:0.65rem;color:rgba(232,236,240,0.6);" id="mbStateLabel">OFF — protein closed</span>
-          <button id="mbToggle" class="control-btn-alt">Signal</button>
-        </div>
-      </div>
+    <div class="mb-mode-row">
+      <button class="mode-btn trad" id="btnTrad">◀ Traditional Drug</button>
+      <button class="mode-btn" id="btnMol">Molecular Bit ▶</button>
+    </div>
+    <canvas id="mbCanvas" width="840" height="420"></canvas>
+    <div style="padding:0.7rem 1rem;border-top:1px solid rgba(232,236,240,0.07);display:flex;align-items:center;justify-content:flex-end;">
+      <button class="hold-btn hidden" id="holdBtn">Hold — Apply Field</button>
     </div>
   </div>
 
   <div class="tiers">
     <div class="tier">
-      <div class="tier-num">01 / Computational Design</div>
+      <div class="tier-num">01</div>
       <div class="tier-title">Computational Design</div>
-      <span class="tier-status complete">Complete</span>
-      <div class="tier-desc">Generative AI designs candidates. Physics simulation screens switching dynamics before anything is synthesized. Second-generation candidate pool running now.</div>
+      <div class="tier-desc">Generative AI designs candidates, molecular dynamics validates them.</div>
     </div>
     <div class="tier">
-      <div class="tier-num">02 / Wet Lab Proof of Concept</div>
+      <div class="tier-num">02</div>
       <div class="tier-title">Wet Lab Proof of Concept</div>
-      <span class="tier-status next">Next milestone</span>
-      <div class="tier-desc">Express top candidates, conjugate to nanoparticles, demonstrate field-driven switching in buffer. Simulation becomes physical evidence.</div>
+      <div class="tier-desc">Demonstrate that an external field can measurably and reversibly switch a protein's behavior on and off on demand.</div>
     </div>
     <div class="tier">
-      <div class="tier-num">03 / Platform Validation</div>
+      <div class="tier-num">03</div>
       <div class="tier-title">Platform Validation</div>
-      <span class="tier-status forthcoming">Forthcoming</span>
       <div class="tier-desc">Same control layer, different proteins. This is where it becomes a platform.</div>
     </div>
   </div>
@@ -131,7 +131,7 @@
 
   <div class="contact-cta">
     <p>Interested in programmable therapeutics, magnetoelectric nanoparticles, or adaptive biologics?<br>Looking to collaborate or fund Tier 2?</p>
-    <a href="mailto:mattdemp@iu.edu">→ mattdemp@iu.edu</a>
+    <a href="mailto:mattdemp276@gmail.com">→ mattdemp276@gmail.com</a>
   </div>
 </div>
 
@@ -241,7 +241,7 @@
 </div>
 
 <footer>
-  <p>Matthew Dempsey · Indiana University · mattdemp@iu.edu</p>
+  <p>Matthew Dempsey · Indiana University · mattdemp276@gmail.com</p>
   <p>Intelligent Systems Engineering · Class of 2028</p>
 </footer>
 
