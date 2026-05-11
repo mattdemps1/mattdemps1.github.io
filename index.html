@@ -20,76 +20,118 @@
 </nav>
 
 <!-- HERO -->
-<div id="about" style="border-bottom:1px solid var(--border);">
+<div id="about">
   <div class="hero">
     <div class="hero-left">
-      <div class="hero-eyebrow">Indiana University · Class of 2028</div>
-      <h1>Matthew<br><em>Dempsey</em></h1>
-      <p class="hero-sub">Building at the intersection of generative AI, protein engineering, and autonomous systems.</p>
-      <div class="hero-tags">
-        <span class="tag">Computational Biology</span>
-        <span class="tag">Generative AI</span>
-        <span class="tag">Protein Design</span>
-        <span class="tag">Autonomous Systems</span>
+      <div class="hero-headshot" role="img" aria-label="Matthew Dempsey"></div>
+      <div>
+        <h1>Matthew<br><em>Dempsey</em></h1>
+        <p class="hero-sub">Building at the intersection of generative AI, protein engineering, and autonomous systems.</p>
+        <div class="credentials">
+          <span class="cred">Founder, Molecular Bit — Cheng Wu Innovation Challenge, 3rd Place Award ($5K)</span>
+          <span class="cred">First-authored paper, AIAA SciTech Forum 2026, Orlando</span>
+          <span class="cred">AI Engineering &amp; Protein Design Intern, biotech startup</span>
+          <span class="cred">Data Analyst, maternal &amp; infant health outcomes research</span>
+          <span class="cred">Guest lecturer, ENGR-E533 Deep Learning Systems</span>
+        </div>
       </div>
-      <div class="hero-cta">
-        <a href="#molecular-bit" class="btn btn-primary">Featured Project</a>
-        <a href="mailto:mattdemp@iu.edu" class="btn btn-ghost">Get in touch</a>
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="stat-val">3.87 / 4.00</span><span class="stat-key">GPA</span></div>
+        <div class="hero-stat"><span class="stat-val">Class of 2028</span><span class="stat-key">Indiana University</span></div>
+        <div class="hero-stat"><span class="stat-val">Bloomington</span><span class="stat-key">Campus</span></div>
       </div>
     </div>
-    <div class="hero-card">
-      <div class="card-header">
-        <span class="card-title">What I'm Building</span>
-        <span class="card-status">Active Research</span>
-      </div>
-      <div class="impact-item"><div class="impact-dot"></div><div class="impact-text"><strong>Protein therapeutics have no off switch.</strong> Once administered, there's no external way to control them.</div></div>
-      <div class="impact-item"><div class="impact-dot"></div><div class="impact-text"><strong>I'm building a platform to change that</strong> — biological systems switchable from outside the body, wirelessly.</div></div>
-      <div class="impact-item"><div class="impact-dot"></div><div class="impact-text"><strong>Computational-first.</strong> Generative AI designs candidates; physics simulation screens them before any synthesis.</div></div>
-      <div class="card-footer">
-        <div class="stat"><span class="stat-val">Gen 2</span><span class="stat-key">Candidate Pool</span></div>
-        <div class="stat"><span class="stat-val">100s/day</span><span class="stat-key">Designs Screened</span></div>
+    <div class="hero-right">
+      <div class="hero-right-label">Selected Work</div>
+      <div class="proj-cards">
+        <a href="#molecular-bit" class="proj-card featured">
+          <div class="proj-card-tag">Featured · Active Research · Fundraising</div>
+          <div class="proj-card-name">Molecular Bit</div>
+          <div class="proj-card-desc">Building remotely controlled molecular switches for wireless, reversible control of protein activity.</div>
+        </a>
+        <a href="#uav" class="proj-card">
+          <div class="proj-card-tag">Autonomous Systems · Published AIAA 2026</div>
+          <div class="proj-card-name">UAV Predictive Interception</div>
+          <div class="proj-card-desc">Object permanence for drones — predicting targets through occlusion.</div>
+        </a>
+        <a href="#enzyme" class="proj-card">
+          <div class="proj-card-tag">Protein Engineering · Lewis Research Group</div>
+          <div class="proj-card-name">Computational Enzyme Switch</div>
+          <div class="proj-card-desc">A cap domain designed from scratch to gate enzyme activity on demand.</div>
+        </a>
+        <a href="#shadernnn" class="proj-card">
+          <div class="proj-card-tag">WebGL · ML Inference · Interactive</div>
+          <div class="proj-card-name">ShaderNN</div>
+          <div class="proj-card-desc">A neural network running entirely inside a GPU fragment shader. Live demo.</div>
+        </a>
       </div>
     </div>
   </div>
 </div>
 
+<!-- BIO / RESEARCH THESIS -->
+<div class="bio-wrap">
+  <div class="section-label">Research Thesis</div>
+  <h2 class="bio-heading">The control layer.</h2>
+  <div class="bio-body">
+    <p>Before molecular robotics can exist, someone has to build the control layer. You can design proteins that change shape, carry payloads, catalyze reactions — but without a reliable way to command them wirelessly, reversibly, and precisely inside a living system, they're not robots. They're just molecules. My work is building that control layer: a programmable interface between an external signal and a protein's functional state.</p>
+    <p>I think of proteins the way a roboticist thinks about machines: they have states, they respond to inputs, they produce outputs. The part most protein engineers don't think about is the transduction chain — the pathway between the external command and the molecular response. Designing reliable transduction chains with controllable inputs and predictable outputs is what I do in robotics. Molecular Bit is that same framework, applied one level of abstraction down.</p>
+  </div>
+</div>
+
 <!-- ═══════════════════════════ MOLECULAR BIT ═══════════════════════════ -->
 <div class="section-wrap" id="molecular-bit">
-  <div class="section-label">Featured Project</div>
-  <div class="mb-banner"><span class="mb-dot"></span> Active Research · 3rd Place Cheng Wu Innovation Challenge</div>
-  <h2>Molecular Bit</h2>
-  <p class="section-intro">A platform for <strong>engineered protein conformational switching</strong> — enabling a new category of therapeutics switchable from outside the body via <strong>external field actuation</strong>.</p>
+  <div class="section-label">Featured Project · Active Research</div>
+  <div class="mb-banner"><span class="mb-dot"></span> 3rd Place — Cheng Wu Innovation Challenge</div>
+  <p class="section-intro">Molecular Bit is building remotely controlled molecular switches for wireless, reversible control of protein activity. The architecture is protein-agnostic — a command layer any therapeutic can plug into. One platform, built to be the foundation molecular robotics gets built on top of.</p>
 
   <div class="project-split" style="margin-bottom:3rem;">
     <div class="project-text">
-      <p class="proj-tag">The Thesis</p>
-      <p>Most biologically active proteins work like a light with no switch — once present, they're on. There's no remote control for biology.</p>
-      <p>Molecular Bit is a platform for designing proteins engineered to exist in two stable conformational states and to toggle between them in response to an external field. This allows for temporal and spatial control of protein activity without additional drugs or genetic modification.</p>
-      <p>The development cycle is <strong>computational-first</strong>: generative AI proposes candidates, which are then screened through large-scale <strong>molecular dynamics (MD) validation</strong>. Our automated design pipeline evaluates <strong>hundreds of candidates per day</strong>, feeding high-confidence designs into active wet lab planning.</p>
-      <p style="font-family:var(--mono);font-size:0.75rem;color:var(--teal);">→ Status: Second-generation candidates, active wet lab planning.</p>
+      <p class="proj-subhead">No off switch.</p>
+      <p>Once a drug is inside your body, you can't control it. It runs at full strength until it's gone. For a headache, that's fine. For a cancer treatment or a brain condition, it isn't.</p>
+      <p>Molecular Bit is a remote control for medicine. The protein is off by default. A physician switches it on, dials it back, or turns it off again — from outside the body, in real time.</p>
     </div>
     <div>
       <div class="demo-box theme-dark">
         <div class="demo-label"><span>Molecular Switch — Interactive</span></div>
         <canvas id="mbCanvas" width="420" height="300"></canvas>
-        <div class="mb-state-area" style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="mbStateLabel">OFF — protein closed</span>
-          <button id="mbToggle" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);border:1px solid rgba(232,236,240,0.2);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;font-weight:500;transition:all 0.2s;">Signal</button>
+        <div class="mb-state-area" style="padding:0.75rem 1rem;border-top:1px solid rgba(232,236,240,0.1);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--mono);font-size:0.65rem;color:rgba(232,236,240,0.6);" id="mbStateLabel">OFF — protein closed</span>
+          <button id="mbToggle" class="control-btn-alt">Signal</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="mb-pillars">
-    <div class="pillar"><div class="pillar-icon">🧬</div><div class="pillar-title">Generative Design</div><div class="pillar-desc">AI tools generate novel protein candidates optimized for two-state conformational switching.</div></div>
-    <div class="pillar"><div class="pillar-icon">⚛️</div><div class="pillar-title">Physics Screening</div><div class="pillar-desc">Molecular dynamics evaluates switching dynamics before a single protein is synthesized.</div></div>
-    <div class="pillar"><div class="pillar-icon">🔁</div><div class="pillar-title">Iterative Pipeline</div><div class="pillar-desc">Simulation results feed the next design round. Hundreds of candidates evaluated per day.</div></div>
+  <div class="tiers">
+    <div class="tier">
+      <div class="tier-num">01 / Computational Design</div>
+      <div class="tier-title">Computational Design</div>
+      <span class="tier-status complete">Complete</span>
+      <div class="tier-desc">Generative AI designs candidates. Physics simulation screens switching dynamics before anything is synthesized. Second-generation candidate pool running now.</div>
+    </div>
+    <div class="tier">
+      <div class="tier-num">02 / Wet Lab Proof of Concept</div>
+      <div class="tier-title">Wet Lab Proof of Concept</div>
+      <span class="tier-status next">Next milestone</span>
+      <div class="tier-desc">Express top candidates, conjugate to nanoparticles, demonstrate field-driven switching in buffer. Simulation becomes physical evidence.</div>
+    </div>
+    <div class="tier">
+      <div class="tier-num">03 / Platform Validation</div>
+      <div class="tier-title">Platform Validation</div>
+      <span class="tier-status forthcoming">Forthcoming</span>
+      <div class="tier-desc">Same control layer, different proteins. This is where it becomes a platform.</div>
+    </div>
   </div>
 
-  <div class="app-strip">
-    <div class="app-card"><div class="app-card-title">Precision Drug Delivery</div><div class="app-card-desc">Therapeutics that activate only at the target site — not systemically.</div></div>
-    <div class="app-card"><div class="app-card-title">Physician-Controlled Biologics</div><div class="app-card-desc">Treatments a clinician can externally modulate after administration.</div></div>
-    <div class="app-card"><div class="app-card-title">Programmable Biological Gating</div><div class="app-card-desc">A general platform for controlling when and where biological processes fire.</div></div>
+  <div class="photo-strip">
+    <img src="images/chengwu.jpg" alt="Presenting Molecular Bit at the Cheng Wu Innovation Challenge" class="photo-strip-img">
+    <span class="photo-caption">Cheng Wu Innovation Challenge — Indiana University · 3rd Place</span>
+  </div>
+
+  <div class="contact-cta">
+    <p>Interested in programmable therapeutics, magnetoelectric nanoparticles, or adaptive biologics?<br>Looking to collaborate or fund Tier 2?</p>
+    <a href="mailto:mattdemp@iu.edu">→ mattdemp@iu.edu</a>
   </div>
 </div>
 
@@ -98,17 +140,18 @@
 <!-- ═══════════════════════════ UAV ═══════════════════════════ -->
 <div class="section-wrap" id="uav">
   <div class="section-label">Autonomous Systems · AIAA SciTech 2026</div>
+  <p class="mission-statement">Object permanence for drones.</p>
   <h2>UAV Predictive Interception</h2>
-  <p class="section-intro">First-authored conference paper. A system that gives drones "object permanence" — predicting where a target is even when they can't see it.</p>
+  <p class="section-intro">First-authored conference paper. Humans can close their eyes and still know where a moving object is going. Drones can't — the moment a target leaves the camera frame, it's gone. This system gives drones that same spatial memory, so they can predict where a target will be and intercept it even through blind spots.</p>
 
   <div class="project-split">
     <div>
       <div class="demo-box theme-dark">
         <div class="demo-label"><span>UAV Predictive Interception — Interactive</span></div>
         <canvas id="uavCanvas" width="420" height="300"></canvas>
-        <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="uavLabel">STATE: STANDBY</span>
-          <button id="uavReset" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);border:1px solid rgba(232,236,240,0.2);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Reset</button>
+        <div style="padding:0.75rem 1rem;border-top:1px solid rgba(232,236,240,0.1);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--mono);font-size:0.65rem;color:rgba(232,236,240,0.6);" id="uavLabel">STATE: STANDBY</span>
+          <button id="uavControl" class="control-btn-alt">Play</button>
         </div>
       </div>
     </div>
@@ -116,35 +159,13 @@
       <p class="proj-tag">Aerospace Systems Lab · Indiana University</p>
       <p>Drones lose situational awareness the moment a target disappears behind an obstacle or exits the camera frame. The system I built treats this like a human tracking problem — predicting where the target went, not just where it was.</p>
       <p>The framework fuses camera data with inertial motion sensors to maintain a continuous target state estimate through visual gaps. When the target reappears, the drone is already pointed in the right direction.</p>
-      <p style="font-family:var(--mono);font-size:0.75rem;color:var(--teal);">→ Presented at AIAA SciTech Forum 2026, Orlando</p>
+      <p style="font-family:var(--mono);font-size:0.75rem;color:var(--accent);opacity:0.8;">→ Presented at AIAA SciTech Forum 2026, Orlando</p>
     </div>
   </div>
-</div>
 
-<hr class="full-divider" />
-
-<!-- ═══════════════════════════ PIPELINE ═══════════════════════════ -->
-<div class="section-wrap" id="pipeline">
-  <div class="section-label">Protein Engineering · Lewis Research Group</div>
-  <h2>HPC Protein Design Pipeline</h2>
-  <p class="section-intro">An automated, lab-wide platform integrating state-of-the-art generative AI tools for de novo multi-state protein design — built and deployed across collaborating labs.</p>
-
-  <div class="project-split">
-    <div class="project-text">
-      <p class="proj-tag">Built & Deployed Lab-Wide</p>
-      <p>Getting cutting-edge protein design tools to actually work together — at scale, reliably, on an HPC cluster — required building the glue that doesn't come in any paper. I integrated the full stack and packaged it with documentation so researchers with no computational background could run it independently.</p>
-      <p>Extended LigandMPNN to support multiple conformational states, enabling designs that hadn't been possible with the stock tool. Automated the full loop: generate → fold predict → score → filter → iterate.</p>
-    </div>
-    <div>
-      <div class="demo-box theme-dark">
-        <div class="demo-label"><span>Automated Design Pipeline — Interactive</span></div>
-        <canvas id="pipeCanvas" width="420" height="300"></canvas>
-        <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="pipeLabel">STATE: STANDBY</span>
-          <button id="pipeRun" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);border:1px solid rgba(232,236,240,0.2);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Run Pipeline</button>
-        </div>
-      </div>
-    </div>
+  <div class="photo-strip">
+    <img src="images/uav-aiaa.jpeg" alt="Presenting UAV research at AIAA SciTech Forum 2026, Orlando" class="photo-strip-img">
+    <span class="photo-caption">AIAA SciTech Forum 2026 · Orlando, Florida</span>
   </div>
 </div>
 
@@ -153,24 +174,50 @@
 <!-- ═══════════════════════════ ENZYME ═══════════════════════════ -->
 <div class="section-wrap" id="enzyme">
   <div class="section-label">Enzyme Design · Lewis Research Group</div>
+  <p class="mission-statement">Built for a reaction that didn't exist in nature.</p>
   <h2>Computational Enzyme Switch</h2>
-  <p class="section-intro">Led the computational design of a ligand-responsive cap domain that controls access to an enzyme's active site.</p>
+  <p class="section-intro">Led the computational design of a protein cap that gates an enzyme's active site — think of it like a trapdoor that opens and closes based on what's chemically present.</p>
 
   <div class="project-split">
     <div>
       <div class="demo-box theme-dark">
         <div class="demo-label"><span>Cap Domain Simulation — Interactive</span></div>
         <canvas id="enzymeCanvas" width="420" height="300"></canvas>
-        <div style="padding:0.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);" id="enzymeLabel">STATE: STANDBY</span>
-          <button id="enzymeToggle" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.08em;text-transform:uppercase;background:rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);border:1px solid rgba(232,236,240,0.2);padding:0.4rem 1rem;border-radius:2px;cursor:pointer;">Add Signal</button>
+        <div style="padding:0.75rem 1rem;border-top:1px solid rgba(232,236,240,0.1);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--mono);font-size:0.65rem;color:rgba(232,236,240,0.6);" id="enzymeLabel">STATE: STANDBY</span>
+          <button id="enzymeToggle" class="control-btn-alt">Add Signal</button>
         </div>
       </div>
     </div>
     <div class="project-text">
       <p class="proj-tag">Multi-State Protein Design</p>
-      <p>Designed a cap domain that physically closes over an enzyme's active site when a specific ligand is present — and opens again when it leaves. This gives the enzyme conditional selectivity: it only acts when the cap allows access.</p>
-      <p>Built automated screening tools to quantify ligand exposure across apo (open) and holo (closed) states, combining structural metrics with predicted signals to produce ranked candidate lists.</p>
+      <p>When the signal is there, the cap closes, sealing out interference and letting the reaction run cleanly. When it's gone, the cap opens and the enzyme sits idle. No natural version existed for this scaffold, so one was designed entirely from scratch using generative AI and screened computationally across both states. Ranked candidates ready for wet lab validation.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="full-divider" />
+
+<!-- ═══════════════════════════ SHADERNNN ═══════════════════════════ -->
+<div class="section-wrap" id="shadernnn">
+  <div class="section-label">Systems · WebGL · Machine Learning</div>
+  <p class="mission-statement">What if a neural network had no runtime?</p>
+  <h2>ShaderNN</h2>
+  <p class="section-intro">A complete neural network running entirely inside a GPU shader — no ML framework, no backend, no runtime. Every pixel on your screen is a neuron. Model weights ship as a PNG.</p>
+
+  <div class="project-split">
+    <div class="project-text">
+      <p class="proj-tag">Neural Cellular Automata · WebGL2</p>
+      <p>Every device with a screen already has a GPU. ShaderNN runs inference directly in the graphics pipeline — 65,536 neurons updated in parallel every frame. The model grows target shapes from a single pixel and is self-healing: damage the pattern, it regenerates itself. Weights are ~12KB total. Training is PyTorch. Inference is pure WebGL2 — nothing else.</p>
+    </div>
+    <div>
+      <div class="demo-box shader-wrap">
+        <div class="demo-label" style="background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);">
+          <span>ShaderNN — Neural Cellular Automata · Live WebGL2</span>
+          <span class="demo-live">Running on GPU</span>
+        </div>
+        <iframe class="shader-iframe" src="../ShaderNN/index.html" title="ShaderNN Neural Cellular Automata" allowfullscreen></iframe>
+      </div>
     </div>
   </div>
 </div>
