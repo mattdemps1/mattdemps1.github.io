@@ -334,7 +334,7 @@ function hexToRgba(hex, alpha) {
   const lbl = document.getElementById('uavLabel'), controlBtn = document.getElementById('uavControl');
   const colors = { bg: '#0F1722', grid: 'rgba(61, 217, 192, 0.08)', teal: '#3DD9C0', blue: '#6BA3E8', red: '#E85A4F', muted: '#4C6A8D' };
   const OBSTACLE = { x: W/2 - 80, y: 50, w: 160, h: 50 }, UAV_START = { x: W/2, y: H - 40 }, TARGET_START = { x: -50, y: 30 };
-  let t = 0, isPlaying = false, targetHistory = [], UAV = { ...UAV_START, vx:0, vy:0, angle:0, state:'WATCHING', targetX:0, targetY:0, lockedInterceptT:0 };
+  let t = 0, isPlaying = false, interceptDone = false, targetHistory = [], UAV = { ...UAV_START, vx:0, vy:0, angle:0, state:'WATCHING', targetX:0, targetY:0, lockedInterceptT:0 };
   const SPEED = 0.0022;
 
   function targetPos(tt) { return { x: TARGET_START.x + tt * (W + 100), y: TARGET_START.y }; }
@@ -374,13 +374,20 @@ function hexToRgba(hex, alpha) {
       }
       if (UAV.state === 'INTERCEPTING') {
         const dx = UAV.targetX - UAV.x, dy = UAV.targetY - UAV.y;
-        if (Math.sqrt(dx*dx + dy*dy) > 2) { UAV.x += UAV.vx; UAV.y += UAV.vy; } else { UAV.state = 'INTERCEPTED'; UAV.vx = 0; UAV.vy = 0; }
+        if (Math.sqrt(dx*dx + dy*dy) > 2) { UAV.x += UAV.vx; UAV.y += UAV.vy; } else {
+          UAV.state = 'INTERCEPTED'; UAV.vx = 0; UAV.vy = 0;
+          if (!interceptDone) { interceptDone = true; setTimeout(() => {
+            isPlaying = false; interceptDone = false; t = 0; targetHistory = [];
+            UAV = { ...UAV_START, vx:0, vy:0, angle:0, state:'WATCHING', targetX:0, targetY:0, lockedInterceptT:0 };
+            controlBtn.textContent = 'Play';
+          }, 2000); }
+        }
       } else if (UAV.state === 'WATCHING') {
         UAV.angle = Math.atan2(tgt.y - UAV.y, tgt.x - UAV.x);
         const lead = targetPos(Math.min(t + 0.15, exitT)); UAV.targetX = lead.x; UAV.targetY = lead.y;
       }
       if (UAV.state !== 'INTERCEPTED') t += SPEED;
-      if (t > 1) { isPlaying = false; controlBtn.textContent = 'Play'; }
+      if (t > 1) { isPlaying = false; t = 0; targetHistory = []; UAV = { ...UAV_START, vx:0, vy:0, angle:0, state:'WATCHING', targetX:0, targetY:0, lockedInterceptT:0 }; controlBtn.textContent = 'Play'; }
     } else {
       UAV.angle = Math.atan2(tgt.y - UAV.y, tgt.x - UAV.x);
       const lead = targetPos(Math.min(t + 0.15, exitT)); UAV.targetX = lead.x; UAV.targetY = lead.y;
@@ -417,12 +424,14 @@ function hexToRgba(hex, alpha) {
     requestAnimationFrame(loop);
   }
 
-  controlBtn.addEventListener('click', () => {
-    if (controlBtn.textContent === 'Reset') {
-      t = 0; UAV = { ...UAV_START, vx:0, vy:0, angle:0, state:'WATCHING', targetX:0, targetY:0, lockedInterceptT:0 };
-      isPlaying = false; targetHistory = []; controlBtn.textContent = 'Play';
-    } else { isPlaying = true; controlBtn.textContent = 'Reset'; }
-  });
+  function uavStart() {
+    t = 0; interceptDone = false;
+    UAV = { ...UAV_START, vx:0, vy:0, angle:0, state:'WATCHING', targetX:0, targetY:0, lockedInterceptT:0 };
+    targetHistory = []; isPlaying = true; controlBtn.textContent = 'Reset';
+  }
+  controlBtn.addEventListener('click', () => { if (!isPlaying) uavStart(); });
+  canvas.style.cursor = 'pointer';
+  canvas.addEventListener('click', () => { if (!isPlaying) uavStart(); });
   requestAnimationFrame(loop);
 })();
 
@@ -459,4 +468,6 @@ function hexToRgba(hex, alpha) {
     statusLabel.textContent = 'Apo state — active site open';
     btn.disabled = false;
   });
+  svgEl.style.cursor = 'pointer';
+  svgEl.addEventListener('click', () => { if (!btn.disabled) btn.click(); });
 })();
