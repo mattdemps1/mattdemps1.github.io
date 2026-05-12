@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #0F1722; overflow: hidden; }
+    canvas {
+      display: block; width: 100%; height: 100%;
+      image-rendering: pixelated; image-rendering: crisp-edges;
+      cursor: crosshair;
+    }
+    #reset-btn {
+      position: absolute; bottom: 0.65rem; right: 0.75rem;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      background: rgba(61,217,192,0.1); color: #3DD9C0;
+      border: 1px solid rgba(61,217,192,0.3);
+      padding: 0.35rem 0.9rem; border-radius: 2px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    #reset-btn:hover { background: rgba(61,217,192,0.2); }
+    #err {
+      display: none; position: absolute; inset: 0;
+      background: #0F1722; color: rgba(232,236,240,0.5);
+      font-family: monospace; font-size: 0.7rem;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="ca-canvas"></canvas>
+  <button id="reset-btn">Reset</button>
+  <div id="err"></div>
+<script>
+/* ─── CONFIG ─────────────────────────────────────────────────────────── */
+const CFG = {
+  gridW: 256, gridH: 256,
+  numChannels: 16, hiddenDim: 96, perceptionDim: 48,
+  stepsPerFrame: 2, aliveThreshold: 0.1, damageRadius: 20,
+};
+
+/* ─── WEIGHT LOADING ────────────────────────────────────────────────── */
+async function decodePng(url, rows, cols) {
+  const blob = await fetch(url).then(r => {
+    if (!r.ok) throw new Error('fetch ' + url + ' → ' + r.status);
+    return r.blob();
+  });
+  const bitmap = await createImageBitmap(blob, { colorSpaceConversion: 'none' });
+  const c = document.createElement('canvas');
+  c.width = cols; c.height = rows;
+  c.getContext('2d').drawImage(bitmap, 0, 0);
+  const raw = c.getContext('2d').getImageData(0, 0, cols, rows).data;
+  const out = new Float32Array(rows * cols);
+  for (let i = 0; i < out.length; i++) out[i] = raw[i * 4];
+  return out;
+}
+
+async function loadWeights(gl) {
+  const meta = await fetch('ca_weights_lizard.json').then(r => {
+    if (!r.ok) throw new Error('fetch ca_weights_lizard.json → ' + r.status);
+    return r.json();
+  });
+  const [fc1Raw, fc2Raw] = await Promise.all([
+    decodePng('ca_fc1_lizard.png', 96, 48),
+    decodePng('ca_fc2_lizard.png', 16, 96),
+  ]);
+
+  // dequantize: pixel/255 * scale + min
+  const fc1 = new Float32Array(96 * 48);
+  for (let i = 0; i < fc1.length; i++)
+    fc1[i] = fc1Raw[i] / 255.0 * meta.fc1_scale + meta.fc1_min;
+
+  const fc2 = new Float32Array(16 * 96);
+  for (let i = 0; i < fc2.length; i++)
+    fc2[i] = fc2Raw[i] / 255.0 * meta.fc2_scale + meta.fc2_min;
+
+  // std140 layout: vec4 fc1[1152], vec4 b1[24], vec4 fc2[384], vec4 b2[4]
+  const uboData = new Float32Array(6256);
+  uboData.set(fc1, 0);
+  uboData.set(meta.fc1_bias, 4608);
+  uboData.set(fc2, 4704);
+  uboData.set(meta.fc2_bias, 6240);
+
+  const ubo = gl.createBuffer();
+  gl.bindBuffer(gl.UNIFORM_BUFFER, ubo);
+  gl.bufferData(gl.UNIFORM_BUFFER, uboData, gl.STATIC_DRAW);
+  gl.bindBuffer(gl.UNIFORM_BUFFER, null);
+  return { ubo };
+}
+
+/* ─── GL UTILITIES ───────────────────────────────────────────────────── */
+function getGL(canvas) {
+  const gl = canvas.getContext('webgl2', { antialias: false, premultipliedAlpha: false });
+  if (!gl) throw new Error('WebGL2 not supported in this browser.');
+  if (!gl.getExtension('EXT_color_buffer_float'))
+    throw new Error('EXT_color_buffer_float required for RGBA32F render targets.');
+  return gl;
+}
+
+function makeProgram(gl, vsSrc, fsSrc, name) {
+  function compile(type, src, label) {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      const log = gl.getShaderInfoLog(sh);
+      gl.deleteShader(sh);
+      throw new Error(label + ' compile failed:\n' + log);
+    }
+    return sh;
+  }
+  const vs = compile(gl.VERTEX_SHADER,   vsSrc, name + '.vert');
+  const fs = compile(gl.FRAGMENT_SHADER, fsSrc, name + '.frag');
+  const p  = gl.createProgram();
+  gl.attachShader(p, vs); gl.attachShader(p, fs);
+  gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS))
+    throw new Error(name + ' link failed:\n' + gl.getProgramInfoLog(p));
+  gl.deleteShader(vs); gl.deleteShader(fs);
+  return p;
+}
+
+function makeQuad(gl) {
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  gl.bindVertexArray(null);
+  return vao;
+}
+
+function makeFloatTex(gl, w, h) {
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, w, h, 0, gl.RGBA, gl.FLOAT, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+  return tex;
+}
+
+function makeFBO(gl, attachments) {
+  const fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  const drawBuffers = attachments.map((tex, i) => {
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+i, gl.TEXTURE_2D, tex, 0);
+    return gl.COLOR_ATTACHMENT0+i;
+  });
+  gl.drawBuffers(drawBuffers);
+  const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+  if (status !== gl.FRAMEBUFFER_COMPLETE)
+    throw new Error('FBO incomplete: 0x' + status.toString(16));
+  return fbo;
+}
+
+/* ─── CA ENGINE ──────────────────────────────────────────────────────── */
+function buildCA(canvas) {
+  const gl = getGL(canvas);
+  const GW = CFG.gridW, GH = CFG.gridH;
+
+  const VERT = `#version 300 es
+layout(location=0) in vec2 a_pos;
+out vec2 v_uv;
+void main() {
+  v_uv = a_pos * 0.5 + 0.5;
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+}`;
+
+  const DISPLAY_FRAG = `#version 300 es
+precision highp float;
+in vec2 v_uv;
+out vec4 fragColor;
+uniform sampler2D uState0;
+void main() {
+  vec4 s = texture(uState0, v_uv);
+  vec3 rgb = clamp(s.rgb, 0.0, 1.0);
+  float a   = clamp(s.a,   0.0, 1.0);
+  fragColor = vec4(mix(vec3(0.059, 0.090, 0.133), rgb, a), 1.0);
+}`;
+
+  const CA_FRAG = `#version 300 es
+precision highp float;
+in vec2 v_uv;
+layout(location=0) out vec4 out0;
+layout(location=1) out vec4 out1;
+layout(location=2) out vec4 out2;
+layout(location=3) out vec4 out3;
+uniform sampler2D uState0, uState1, uState2, uState3;
+uniform vec2  uTexelSize;
+uniform float uRandSeed;
+uniform vec2  uDamageCenter;
+uniform float uDamageRadius;
+layout(std140) uniform Weights {
+  vec4 fc1[1152];
+  vec4 b1[24];
+  vec4 fc2[384];
+  vec4 b2[4];
+} W;
+float wangHash(vec2 uv, float seed) {
+  uvec2 p = uvec2(uv * 65535.0);
+  uint  n = p.x * 1664525u + p.y * 1013904223u + uint(seed * 4096.0);
+  n = (n ^ (n >> 16u)) * 0x45d9f3bu;
+  n = (n ^ (n >> 16u)) * 0x45d9f3bu;
+  n =  n ^ (n >> 16u);
+  return float(n) / 4294967295.0;
+}
+void fetchCell(vec2 uv, out vec4 s0, out vec4 s1, out vec4 s2, out vec4 s3) {
+  s0 = texture(uState0, uv); s1 = texture(uState1, uv);
+  s2 = texture(uState2, uv); s3 = texture(uState3, uv);
+}
+vec4 fc1w(int j, int k) { return W.fc1[j * 12 + k]; }
+vec4 fc2w(int j, int k) { return W.fc2[j * 24 + k]; }
+void main() {
+  vec2 dx = vec2(uTexelSize.x, 0.0);
+  vec2 dy = vec2(0.0, uTexelSize.y);
+  vec4 n00_0,n00_1,n00_2,n00_3; fetchCell(v_uv-dx-dy, n00_0,n00_1,n00_2,n00_3);
+  vec4 n10_0,n10_1,n10_2,n10_3; fetchCell(v_uv   -dy, n10_0,n10_1,n10_2,n10_3);
+  vec4 n20_0,n20_1,n20_2,n20_3; fetchCell(v_uv+dx-dy, n20_0,n20_1,n20_2,n20_3);
+  vec4 n01_0,n01_1,n01_2,n01_3; fetchCell(v_uv-dx,    n01_0,n01_1,n01_2,n01_3);
+  vec4 c0,c1,c2,c3;             fetchCell(v_uv,        c0,c1,c2,c3);
+  vec4 n21_0,n21_1,n21_2,n21_3; fetchCell(v_uv+dx,    n21_0,n21_1,n21_2,n21_3);
+  vec4 n02_0,n02_1,n02_2,n02_3; fetchCell(v_uv-dx+dy, n02_0,n02_1,n02_2,n02_3);
+  vec4 n12_0,n12_1,n12_2,n12_3; fetchCell(v_uv   +dy, n12_0,n12_1,n12_2,n12_3);
+  vec4 n22_0,n22_1,n22_2,n22_3; fetchCell(v_uv+dx+dy, n22_0,n22_1,n22_2,n22_3);
+  float maxA = max(max(max(n00_0.a,n10_0.a),max(n20_0.a,n01_0.a)),
+                   max(max(c0.a,   n21_0.a),max(max(n02_0.a,n12_0.a),n22_0.a)));
+  float alive = step(0.10, maxA);
+  vec4 perc[12];
+  perc[0]=c0; perc[1]=c1; perc[2]=c2; perc[3]=c3;
+  perc[4] =((-n00_0-2.0*n01_0-n02_0)+(n20_0+2.0*n21_0+n22_0))/8.0;
+  perc[5] =((-n00_1-2.0*n01_1-n02_1)+(n20_1+2.0*n21_1+n22_1))/8.0;
+  perc[6] =((-n00_2-2.0*n01_2-n02_2)+(n20_2+2.0*n21_2+n22_2))/8.0;
+  perc[7] =((-n00_3-2.0*n01_3-n02_3)+(n20_3+2.0*n21_3+n22_3))/8.0;
+  perc[8] =((-n00_0-2.0*n10_0-n20_0)+(n02_0+2.0*n12_0+n22_0))/8.0;
+  perc[9] =((-n00_1-2.0*n10_1-n20_1)+(n02_1+2.0*n12_1+n22_1))/8.0;
+  perc[10]=((-n00_2-2.0*n10_2-n20_2)+(n02_2+2.0*n12_2+n22_2))/8.0;
+  perc[11]=((-n00_3-2.0*n10_3-n20_3)+(n02_3+2.0*n12_3+n22_3))/8.0;
+  vec4 hidden[24];
+  for (int j = 0; j < 24; j++) {
+    vec4 acc = vec4(0.0);
+    for (int k = 0; k < 12; k++) {
+      acc.x += dot(fc1w(j*4+0, k), perc[k]);
+      acc.y += dot(fc1w(j*4+1, k), perc[k]);
+      acc.z += dot(fc1w(j*4+2, k), perc[k]);
+      acc.w += dot(fc1w(j*4+3, k), perc[k]);
+    }
+    hidden[j] = max(vec4(0.0), acc + W.b1[j]);
+  }
+  vec4 delta[4];
+  for (int j = 0; j < 4; j++) {
+    vec4 acc = vec4(0.0);
+    for (int k = 0; k < 24; k++) {
+      acc.x += dot(fc2w(j*4+0, k), hidden[k]);
+      acc.y += dot(fc2w(j*4+1, k), hidden[k]);
+      acc.z += dot(fc2w(j*4+2, k), hidden[k]);
+      acc.w += dot(fc2w(j*4+3, k), hidden[k]);
+    }
+    delta[j] = acc + W.b2[j];
+  }
+  float stoch = step(0.5, wangHash(v_uv, uRandSeed));
+  float dmg = 1.0;
+  if (uDamageCenter.x >= 0.0) {
+    float dist = length((v_uv - uDamageCenter) * vec2(256.0, 256.0));
+    dmg = step(uDamageRadius, dist);
+  }
+  float delta_mask = alive * stoch;
+  out0 = clamp((c0 + delta[0] * delta_mask) * alive * dmg, -1.0, 1.0);
+  out1 = clamp((c1 + delta[1] * delta_mask) * alive * dmg, -1.0, 1.0);
+  out2 = clamp((c2 + delta[2] * delta_mask) * alive * dmg, -1.0, 1.0);
+  out3 = clamp((c3 + delta[3] * delta_mask) * alive * dmg, -1.0, 1.0);
+}`;
+
+  const vao        = makeQuad(gl);
+  const caProg     = makeProgram(gl, VERT, CA_FRAG,      'ca');
+  const dispProg   = makeProgram(gl, VERT, DISPLAY_FRAG, 'display');
+  const readTex    = Array.from({length:4}, () => makeFloatTex(gl, GW, GH));
+  const writeTex   = Array.from({length:4}, () => makeFloatTex(gl, GW, GH));
+  const readFBO    = makeFBO(gl, readTex);
+  const writeFBO   = makeFBO(gl, writeTex);
+
+  const uLoc = {
+    texelSize:    gl.getUniformLocation(caProg, 'uTexelSize'),
+    randSeed:     gl.getUniformLocation(caProg, 'uRandSeed'),
+    dmgCenter:    gl.getUniformLocation(caProg, 'uDamageCenter'),
+    dmgRadius:    gl.getUniformLocation(caProg, 'uDamageRadius'),
+    states:       [0,1,2,3].map(i => gl.getUniformLocation(caProg, `uState${i}`)),
+    dispState:    gl.getUniformLocation(dispProg, 'uState0'),
+  };
+
+  let dmgCenter = [-1, -1], frameIdx = 0;
+
+  function reattach(fbo, texSet) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    texSet.forEach((t,i) =>
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+i, gl.TEXTURE_2D, t, 0));
+  }
+
+  function step() {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, writeFBO);
+    gl.viewport(0, 0, GW, GH);
+    gl.useProgram(caProg);
+    gl.bindVertexArray(vao);
+    gl.uniform2f(uLoc.texelSize, 1/GW, 1/GH);
+    gl.uniform1f(uLoc.randSeed, (frameIdx++ * 1.6180339887) % 1024);
+    gl.uniform2f(uLoc.dmgCenter, dmgCenter[0], dmgCenter[1]);
+    gl.uniform1f(uLoc.dmgRadius, CFG.damageRadius);
+    readTex.forEach((t,i) => {
+      gl.activeTexture(gl.TEXTURE0+i);
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.uniform1i(uLoc.states[i], i);
+    });
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    for (let i = 0; i < 4; i++) {
+      const tmp = readTex[i]; readTex[i] = writeTex[i]; writeTex[i] = tmp;
+    }
+    reattach(readFBO, readTex);
+    reattach(writeFBO, writeTex);
+  }
+
+  function display() {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.useProgram(dispProg);
+    gl.bindVertexArray(vao);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, readTex[0]);
+    gl.uniform1i(uLoc.dispState, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  function seed(rgba) {
+    const cx = Math.floor(GW/2), cy = Math.floor(GH/2);
+    const px = new Float32Array([rgba[0], rgba[1], rgba[2], rgba[3]]);
+    gl.bindTexture(gl.TEXTURE_2D, readTex[0]);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, cx, cy, 1, 1, gl.RGBA, gl.FLOAT, px);
+  }
+
+  function reset(rgba) {
+    const zeros = new Float32Array(GW * GH * 4);
+    readTex.forEach(t => {
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, GW, GH, 0, gl.RGBA, gl.FLOAT, zeros);
+    });
+    frameIdx = 0;
+    if (rgba) seed(rgba);
+  }
+
+  function setDamage(uvX, uvY) { dmgCenter = [uvX, uvY]; }
+  function clearDamage()        { dmgCenter = [-1, -1]; }
+
+  function bindWeights(ubo) {
+    const idx = gl.getUniformBlockIndex(caProg, 'Weights');
+    if (idx === gl.INVALID_INDEX) throw new Error('Weights UBO not found');
+    gl.uniformBlockBinding(caProg, idx, 0);
+    gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo);
+  }
+
+  return { gl, step, display, seed, reset, setDamage, clearDamage, bindWeights };
+}
+
+/* ─── MAIN ───────────────────────────────────────────────────────────── */
+async function main() {
+  const canvas = document.getElementById('ca-canvas');
+  canvas.width = CFG.gridW; canvas.height = CFG.gridH;
+
+  let ca;
+  try {
+    ca = buildCA(canvas);
+  } catch (e) {
+    const el = document.getElementById('err');
+    el.textContent = e.message; el.style.display = 'flex';
+    return;
+  }
+
+  const SEED = [0.18, 0.68, 0.25, 1.0];
+  ca.reset(SEED);
+
+  const { ubo } = await loadWeights(ca.gl);
+  ca.bindWeights(ubo);
+
+  let reseedTimer = 0, isDamaging = false;
+
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    ca.reset(SEED); reseedTimer = 0;
+  });
+  window.addEventListener('keydown', e => {
+    if (e.code === 'KeyR') { ca.reset(SEED); reseedTimer = 0; }
+  });
+
+  function uv(e) {
+    const r = canvas.getBoundingClientRect();
+    return [(e.clientX - r.left) / r.width, 1 - (e.clientY - r.top) / r.height];
+  }
+  canvas.addEventListener('pointerdown', e => {
+    isDamaging = true; canvas.setPointerCapture(e.pointerId);
+    ca.setDamage(...uv(e)); e.preventDefault();
+  });
+  canvas.addEventListener('pointermove', e => { if (isDamaging) ca.setDamage(...uv(e)); });
+  canvas.addEventListener('pointerup',  () => { if (isDamaging) reseedTimer = 30; isDamaging = false; ca.clearDamage(); });
+  canvas.addEventListener('pointerout', () => { if (isDamaging) reseedTimer = 30; isDamaging = false; ca.clearDamage(); });
+
+  function frame() {
+    if (reseedTimer > 0) { ca.seed(SEED); reseedTimer--; }
+    for (let i = 0; i < CFG.stepsPerFrame; i++) ca.step();
+    ca.display();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+main().catch(e => {
+  console.error(e);
+  const el = document.getElementById('err');
+  el.textContent = 'Could not start demo: ' + e.message;
+  el.style.display = 'flex';
+});
+</script>
+</body>
+</html>
