@@ -30,7 +30,7 @@
         <div class="credentials">
           <span class="cred">Founder, Molecular Bit — Cheng Wu Innovation Challenge, 3rd Place Award ($5K)</span>
           <span class="cred">First-authored paper, AIAA SciTech Forum 2026, Orlando</span>
-          <span class="cred">AI Engineering &amp; Protein Design Intern, biotech startup</span>
+          <span class="cred">AI Engineering &amp; Protein Design Contractor, biotech startup</span>
           <span class="cred">Data Analyst, maternal &amp; infant health outcomes research</span>
           <span class="cred">Guest lecturer, ENGR-E533 Deep Learning Systems</span>
         </div>
@@ -42,10 +42,28 @@
       </div>
     </div>
     <div class="hero-right">
+      <div>
+        <div class="hero-right-label">Focus Areas</div>
+        <div class="focus-areas">
+          <div class="focus-item">
+            <div class="focus-name">Programmable biology</div>
+            <div class="focus-desc">Multistate proteins, enzymes, synthetic biology</div>
+          </div>
+          <div class="focus-item">
+            <div class="focus-name">Autonomous systems</div>
+            <div class="focus-desc">Robotics, embedded devices, multi-agent coordination</div>
+          </div>
+          <div class="focus-item">
+            <div class="focus-name">Generative AI</div>
+            <div class="focus-desc">Diffusion models, AI agents, computational protein design</div>
+          </div>
+        </div>
+      </div>
+      <div>
       <div class="hero-right-label">Selected Work</div>
       <div class="proj-cards">
         <a href="#molecular-bit" class="proj-card featured">
-          <div class="proj-card-tag">Featured · Active Research · Fundraising</div>
+          <div class="proj-card-tag">Featured · Active Development · Fundraising</div>
           <div class="proj-card-name">Molecular Bit</div>
           <div class="proj-card-desc">Building remotely controlled molecular switches for wireless, reversible control of protein activity.</div>
         </a>
@@ -65,24 +83,18 @@
           <div class="proj-card-desc">A neural network running entirely inside a GPU fragment shader. Live demo.</div>
         </a>
       </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- BIO / RESEARCH THESIS -->
-<div class="bio-wrap">
-  <div class="section-label">Research Thesis</div>
-  <h2 class="bio-heading">The control layer.</h2>
-  <div class="bio-body">
-    <p>Before molecular robotics can exist, someone has to build the control layer. You can design proteins that change shape, carry payloads, catalyze reactions — but without a reliable way to command them wirelessly, reversibly, and precisely inside a living system, they're not robots. They're just molecules. My work is building that control layer: a programmable interface between an external signal and a protein's functional state.</p>
-    <p>I think of proteins the way a roboticist thinks about machines: they have states, they respond to inputs, they produce outputs. The part most protein engineers don't think about is the transduction chain — the pathway between the external command and the molecular response. Designing reliable transduction chains with controllable inputs and predictable outputs is what I do in robotics. Molecular Bit is that same framework, applied one level of abstraction down.</p>
-  </div>
-</div>
 
 <!-- ═══════════════════════════ MOLECULAR BIT ═══════════════════════════ -->
 <div class="section-wrap" id="molecular-bit">
-  <div class="section-label">Featured Project · Active Research</div>
-  <div class="mb-banner"><span class="mb-dot"></span> 3rd Place — Cheng Wu Innovation Challenge</div>
+  <div class="section-label">Featured Project · Active Development</div>
+  <div class="project-timeline">Oct 2025 – Present</div>
+  <h2>Molecular Bit</h2>
+  <p class="thesis-lead">The remote control for programmable therapeutics.</p>
   <p class="section-intro">Molecular Bit is building remotely controlled molecular switches for wireless, reversible control of protein activity. The architecture is protein-agnostic — a command layer any therapeutic can plug into. One platform, built to be the foundation molecular robotics gets built on top of.</p>
 
   <div class="mb-text-block">
@@ -97,8 +109,8 @@
       <span id="mbStateLabel" style="color:rgba(76,106,141,0.85)">off — protein inactive</span>
     </div>
     <div class="mb-mode-row">
-      <button class="mode-btn trad" id="btnTrad">◀ Traditional Drug</button>
-      <button class="mode-btn" id="btnMol">Molecular Bit ▶</button>
+      <button class="mode-btn trad" id="btnTrad">Traditional Drug</button>
+      <button class="mode-btn" id="btnMol">Molecular Bit</button>
     </div>
     <canvas id="mbCanvas" width="840" height="420"></canvas>
     <div style="padding:0.7rem 1rem;border-top:1px solid rgba(232,236,240,0.07);display:flex;align-items:center;justify-content:flex-end;">
@@ -140,8 +152,9 @@
 <!-- ═══════════════════════════ UAV ═══════════════════════════ -->
 <div class="section-wrap" id="uav">
   <div class="section-label">Autonomous Systems · AIAA SciTech 2026</div>
-  <p class="mission-statement">Object permanence for drones.</p>
+  <div class="project-timeline">Jun 2025 – Jan 2026</div>
   <h2>UAV Predictive Interception</h2>
+  <p class="mission-statement">Object permanence for drones.</p>
   <p class="section-intro">First-authored conference paper. Humans can close their eyes and still know where a moving object is going. Drones can't — the moment a target leaves the camera frame, it's gone. This system gives drones that same spatial memory, so they can predict where a target will be and intercept it even through blind spots.</p>
 
   <div class="project-split">
@@ -174,18 +187,46 @@
 <!-- ═══════════════════════════ ENZYME ═══════════════════════════ -->
 <div class="section-wrap" id="enzyme">
   <div class="section-label">Enzyme Design · Lewis Research Group</div>
-  <p class="mission-statement">Built for a reaction that didn't exist in nature.</p>
+  <div class="project-timeline">Apr 2025 – Nov 2025</div>
   <h2>Computational Enzyme Switch</h2>
+  <p class="mission-statement">Built for a reaction that didn't exist in nature.</p>
   <p class="section-intro">Led the computational design of a protein cap that gates an enzyme's active site — think of it like a trapdoor that opens and closes based on what's chemically present.</p>
 
   <div class="project-split">
     <div>
       <div class="demo-box theme-dark">
-        <div class="demo-label"><span>Cap Domain Simulation — Interactive</span></div>
-        <canvas id="enzymeCanvas" width="420" height="300"></canvas>
-        <div style="padding:0.75rem 1rem;border-top:1px solid rgba(232,236,240,0.1);display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-family:var(--mono);font-size:0.65rem;color:rgba(232,236,240,0.6);" id="enzymeLabel">STATE: STANDBY</span>
-          <button id="enzymeToggle" class="control-btn-alt">Add Signal</button>
+        <div class="demo-label">
+          <span>Catalytic Cycle — Interactive</span>
+          <span id="enzymeStatusLabel" style="color:rgba(232,236,240,0.45);">Apo state — active site open</span>
+        </div>
+        <div class="enzyme-svg-wrap">
+          <svg viewBox="0 0 500 500" class="stage-1" id="enzyme-svg">
+            <defs>
+              <filter id="eshadow-soft" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#3DD9C0" flood-opacity="0.1"/>
+              </filter>
+              <filter id="eshadow-cap" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#3DD9C0" flood-opacity="0.2"/>
+              </filter>
+            </defs>
+            <g filter="url(#eshadow-soft)">
+              <path d="M 120 250 A 130 130 0 0 0 380 250 L 280 250 L 280 272 A 8 8 0 0 1 272 280 L 228 280 A 8 8 0 0 1 220 272 L 220 250 Z"
+                    fill="rgba(61,217,192,0.08)" stroke="#3DD9C0" stroke-width="1.5" stroke-opacity="0.45" stroke-linejoin="round"/>
+            </g>
+            <circle cx="120" cy="250" r="18" fill="rgba(61,217,192,0.08)" stroke="#3DD9C0" stroke-width="1.5" stroke-opacity="0.45"/>
+            <rect id="reactant" x="220" y="220" width="60" height="60" rx="8" fill="#E8A838"/>
+            <circle id="product" cx="250" cy="250" r="30" fill="#6BA3E8"/>
+            <g id="cap-domain">
+              <path d="M 120 250 A 130 130 0 0 1 380 250 L 280 250 L 280 228 A 8 8 0 0 0 272 220 L 228 220 A 8 8 0 0 0 220 228 L 220 250 Z"
+                    fill="rgba(61,217,192,0.13)" stroke="#3DD9C0" stroke-width="1.5" stroke-linejoin="round"
+                    filter="url(#eshadow-cap)"/>
+              <circle cx="120" cy="250" r="8" fill="#3DD9C0"/>
+              <circle cx="120" cy="250" r="3" fill="#0F1722"/>
+            </g>
+          </svg>
+        </div>
+        <div style="padding:0.75rem 1rem;border-top:1px solid rgba(232,236,240,0.1);display:flex;align-items:center;justify-content:flex-end;">
+          <button id="enzymeCycleBtn" class="control-btn-alt">Execute Cycle</button>
         </div>
       </div>
     </div>
@@ -201,23 +242,24 @@
 <!-- ═══════════════════════════ SHADERNNN ═══════════════════════════ -->
 <div class="section-wrap" id="shadernnn">
   <div class="section-label">Systems · WebGL · Machine Learning</div>
-  <p class="mission-statement">What if a neural network had no runtime?</p>
+  <div class="project-timeline">Jun 2024 – Dec 2024</div>
   <h2>ShaderNN</h2>
+  <p class="mission-statement">What if a neural network had no runtime?</p>
   <p class="section-intro">A complete neural network running entirely inside a GPU shader — no ML framework, no backend, no runtime. Every pixel on your screen is a neuron. Model weights ship as a PNG.</p>
 
   <div class="project-split">
-    <div class="project-text">
-      <p class="proj-tag">Neural Cellular Automata · WebGL2</p>
-      <p>Every device with a screen already has a GPU. ShaderNN runs inference directly in the graphics pipeline — 65,536 neurons updated in parallel every frame. The model grows target shapes from a single pixel and is self-healing: damage the pattern, it regenerates itself. Weights are ~12KB total. Training is PyTorch. Inference is pure WebGL2 — nothing else.</p>
-    </div>
     <div>
       <div class="demo-box shader-wrap">
         <div class="demo-label" style="background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(232,236,240,0.1);color:rgba(232,236,240,0.7);">
           <span>ShaderNN — Neural Cellular Automata · Live WebGL2</span>
           <span class="demo-live">Running on GPU</span>
         </div>
-        <iframe class="shader-iframe" src="../ShaderNN/index.html" title="ShaderNN Neural Cellular Automata" allowfullscreen></iframe>
+        <iframe class="shader-iframe" src="../../ShaderNN/index.html" title="ShaderNN Neural Cellular Automata" allowfullscreen></iframe>
       </div>
+    </div>
+    <div class="project-text">
+      <p class="proj-tag">Neural Cellular Automata · WebGL2</p>
+      <p>Every device with a screen already has a GPU. ShaderNN runs inference directly in the graphics pipeline — 65,536 neurons updated in parallel every frame. The model grows target shapes from a single pixel and is self-healing: damage the pattern, it regenerates itself. Weights are ~12KB total. Training is PyTorch. Inference is pure WebGL2 — nothing else.</p>
     </div>
   </div>
 </div>

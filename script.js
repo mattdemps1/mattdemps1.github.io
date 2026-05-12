@@ -29,10 +29,10 @@ function hexToRgba(hex, alpha) {
   const MUTED = '#4C6A8D';
   const TEXT  = '#E8ECF0';
   const BG    = '#0F1722';
-  const WARM_BG   = '#F5F3F0';
-  const WARM_NAVY = '#1B3A5C';
-  const WARM_RED  = '#C7483C';
-  const WARM_TEAL = '#2E8B8B';
+  const WARM_BG   = '#0F1722';
+  const WARM_NAVY = '#E8ECF0';
+  const WARM_RED  = '#E55A50';
+  const WARM_TEAL = '#3DD9C0';
 
   function hexRgb(h) { return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
   function rgba(hex, a) { const [r,g,b] = hexRgb(hex); return `rgba(${r},${g},${b},${+a.toFixed(3)})`; }
@@ -44,19 +44,26 @@ function hexToRgba(hex, alpha) {
   const SUB_TH   = 0.35;
 
   let mode = 'traditional', held = false, activation = 0, drugLevel = 0, tradTime = 0, toxicSev = 0, subSev = 0;
+  let started = false;
 
   const GRAPH_N = 220;
   const graph   = new Float32Array(GRAPH_N);
   let graphHead = 0;
 
-  window.addEventListener('keydown', e => { if ((e.key === 'm' || e.key === 'M') && !e.repeat) setHeld(true); });
-  window.addEventListener('keyup',   e => { if (e.key === 'm' || e.key === 'M') setHeld(false); });
   holdBtn.addEventListener('mousedown',  e => { e.preventDefault(); setHeld(true); });
   document.addEventListener('mouseup',   () => { if (held) setHeld(false); });
   holdBtn.addEventListener('touchstart', e => { e.preventDefault(); setHeld(true); });
   document.addEventListener('touchend',  () => { if (held) setHeld(false); });
+  canvas.addEventListener('mousedown',   e => { e.preventDefault(); setHeld(true); });
+  canvas.addEventListener('touchstart',  e => { e.preventDefault(); setHeld(true); });
 
   function setHeld(v) {
+    if (!started && v) {
+      started = true;
+      lastTs = null;
+      holdBtn.className = 'hold-btn hidden';
+      return;
+    }
     if (mode !== 'molecular') return;
     held = v;
     holdBtn.classList.toggle('active', v);
@@ -72,8 +79,15 @@ function hexToRgba(hex, alpha) {
     holdBtn.classList.remove('active');
     btnTrad.className = 'mode-btn' + (m === 'traditional' ? ' trad' : '');
     btnMol.className  = 'mode-btn' + (m === 'molecular'   ? ' mol'  : '');
-    holdBtn.className = 'hold-btn' + (m === 'molecular'   ? '' : ' hidden');
-    poolParticles.length = 0;
+    if (m === 'molecular') {
+      started = true; lastTs = null;
+      holdBtn.textContent = 'Hold — Apply Field';
+      holdBtn.className = 'hold-btn';
+    } else {
+      started = false;
+      holdBtn.textContent = 'Start';
+      holdBtn.className = 'hold-btn';
+    }
   }
 
   function pkLevel(t) {
@@ -102,15 +116,6 @@ function hexToRgba(hex, alpha) {
     updateStatus();
     toxicSev = clamp((drugLevel - TOXIC_TH) / (1 - TOXIC_TH), 0, 1);
     subSev   = clamp((SUB_TH - drugLevel) / SUB_TH, 0, 1);
-    if (toxicSev > 0.12 && Math.random() < toxicSev * 0.04 * dt * 60) {
-      poolParticles.push({ x: BRAIN_X + (Math.random()-0.5)*28, y: BRAIN_Y + (Math.random()-0.5)*16, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.3, life: 1.0 });
-    }
-    for (let i = poolParticles.length - 1; i >= 0; i--) {
-      const p = poolParticles[i];
-      p.x += p.vx; p.y += p.vy;
-      p.life -= 0.006 * dt * 60;
-      if (p.life <= 0) poolParticles.splice(i, 1);
-    }
   }
 
   function updateStatus() {
@@ -131,7 +136,7 @@ function hexToRgba(hex, alpha) {
   let lastTs = null;
   function tick(ts) {
     if (!lastTs) lastTs = ts;
-    update((ts - lastTs) / 1000);
+    if (started) update((ts - lastTs) / 1000);
     lastTs = ts;
     draw();
     requestAnimationFrame(tick);
@@ -190,12 +195,9 @@ function hexToRgba(hex, alpha) {
   const BCX = MID + (W - MID) / 2;
   const BCY = 200;
   const BODY_SCALE = 0.65;
-  const BRAIN_X = BCX;
-  const BRAIN_Y = BCY - 96;
   const RGB_NAVY  = hexRgb(WARM_NAVY);
   const RGB_BG    = hexRgb(WARM_BG);
-  const RGB_REDBG = [255, 222, 218];
-  const poolParticles = [];
+  const RGB_REDBG = [45, 15, 12];
 
   function drawRight() {
     const t = performance.now() / 1000, act = activation;
@@ -210,11 +212,14 @@ function hexToRgba(hex, alpha) {
     const shakeX = shakeAmp > 0.1 ? (Math.sin(t*31)*0.55 + Math.sin(t*23)*0.45) * shakeAmp : 0;
     const shakeY = shakeAmp > 0.1 ? (Math.sin(t*27)*0.55 + Math.sin(t*19)*0.45) * shakeAmp * 0.5 : 0;
     ctx.save(); ctx.translate(shakeX, shakeY);
-    poolParticles.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fillStyle = `rgba(158,42,43,${(p.life*0.55).toFixed(3)})`; ctx.fill(); });
     drawHumanSilhouette(BCX, BCY, BODY_SCALE, toxicSev);
-    drawBrain(BRAIN_X, BRAIN_Y, 0.45, toxicSev * 100, subSev * 75);
     ctx.restore();
     if (toxicSev > 0) { const sp = Math.sin(Date.now()/120)*0.5+0.5; ctx.fillStyle = `rgba(233,94,85,${(toxicSev*0.18*sp).toFixed(3)})`; ctx.fillRect(MID, 0, W - MID, H); }
+    if (drugLevel >= SUB_TH && drugLevel <= TOXIC_TH && toxicSev < 0.05) {
+      const tFrac = (drugLevel - SUB_TH) / (TOXIC_TH - SUB_TH);
+      const tp = Math.sin(t * 0.9) * 0.12 + 0.88;
+      ctx.fillStyle = `rgba(61,217,192,${(tFrac * 0.07 * tp).toFixed(3)})`; ctx.fillRect(MID, 0, W - MID, H);
+    }
     ctx.font = '9px monospace'; ctx.textAlign = 'left';
     ctx.fillStyle = `rgba(${RGB_NAVY[0]},${RGB_NAVY[1]},${RGB_NAVY[2]},0.4)`;
     ctx.fillText('PATIENT', MID + 18, GY - 12);
@@ -237,13 +242,21 @@ function hexToRgba(hex, alpha) {
   }
 
   function drawWaves(act, t) {
-    const wx = BCX - 83, wy = BCY - 10;
-    [30, 56, 82].forEach((r, i) => {
-      const phase = ((t * 1.4 + i * 0.38) % 1), alpha = act * (1 - phase) * 0.5;
-      if (alpha < 0.012) return;
-      ctx.beginPath(); ctx.arc(wx, wy, r*(0.25+phase*0.75)+6, -Math.PI*0.58, Math.PI*0.58);
-      ctx.strokeStyle = `rgba(46,139,139,${alpha.toFixed(3)})`; ctx.lineWidth = 2; ctx.setLineDash([]); ctx.stroke();
+    const wx = BCX - 100, wy = BCY - 5;
+    [22, 48, 76, 108].forEach((r, i) => {
+      const phase = ((t * 1.15 + i * 0.32) % 1);
+      const alpha = act * Math.pow(1 - phase, 1.4) * 0.72;
+      if (alpha < 0.01) return;
+      ctx.beginPath();
+      ctx.arc(wx, wy, r * (0.28 + phase * 0.72) + 6, -Math.PI * 0.65, Math.PI * 0.65);
+      ctx.strokeStyle = `rgba(61,217,192,${alpha.toFixed(3)})`;
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([]);
+      ctx.stroke();
     });
+    const srcAlpha = act * 0.55;
+    ctx.beginPath(); ctx.arc(wx, wy, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(61,217,192,${srcAlpha.toFixed(3)})`; ctx.fill();
   }
 
   function buildHumanPath() {
@@ -277,7 +290,7 @@ function hexToRgba(hex, alpha) {
   function drawHumanSilhouette(cx, cy, scale, urgency) {
     ctx.save(); ctx.translate(cx, cy); ctx.scale(scale, scale);
     buildHumanPath();
-    const fillRgb = lerpRgb([38,45,53], [170,45,38], urgency * 0.72);
+    const fillRgb = lerpRgb([100, 118, 138], [170,45,38], urgency * 0.72);
     ctx.fillStyle = `rgb(${fillRgb[0]},${fillRgb[1]},${fillRgb[2]})`; ctx.fill();
     if (drugLevel > 0.03) {
       buildHumanPath(); ctx.save(); ctx.clip();
@@ -286,7 +299,7 @@ function hexToRgba(hex, alpha) {
         const pulse = Math.sin(Date.now()/180)*0.15+0.85; cr=233; cg=80; cb=70; alpha=(0.28+toxicSev*0.52)*pulse;
       } else if (drugLevel >= SUB_TH) {
         const tFrac = (drugLevel-SUB_TH)/(TOXIC_TH-SUB_TH), pulse=Math.sin(Date.now()/700)*0.06+0.94;
-        cr=61; cg=217; cb=192; alpha=0.30*tFrac*pulse;
+        cr=61; cg=217; cb=192; alpha=0.52*tFrac*pulse;
       } else { cr=90; cg=130; cb=170; alpha=0.08*(drugLevel/SUB_TH); }
       const grd = ctx.createRadialGradient(0,-10,0,0,-10,130);
       grd.addColorStop(0,    `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`);
@@ -299,33 +312,11 @@ function hexToRgba(hex, alpha) {
     if (urgency > 0) {
       const r = Math.round(107+(233-107)*urgency), g = Math.round(162-(162-94)*urgency), b = Math.round(230-(230-85)*urgency);
       ctx.strokeStyle = `rgb(${r},${g},${b})`;
-    } else { ctx.strokeStyle = '#6BA2E6'; }
+    } else if (drugLevel >= SUB_TH && drugLevel <= TOXIC_TH) {
+      const tFrac = (drugLevel - SUB_TH) / (TOXIC_TH - SUB_TH);
+      ctx.strokeStyle = `rgba(61,217,192,${(0.45 + tFrac * 0.45).toFixed(2)})`;
+    } else { ctx.strokeStyle = 'rgba(107,162,230,0.5)'; }
     ctx.stroke(); ctx.restore();
-  }
-
-  function drawBrain(cx, cy, scale, bleed, clot) {
-    ctx.save(); ctx.translate(cx, cy); ctx.scale(scale, scale);
-    const healthyRgb=[183,228,199], hypoxicRgb=[253,244,184], redRgb=[233,94,85];
-    const hypoxiaF = clot/100, bleedF = bleed/100;
-    const mix = (c1,c2,f) => c1.map((v,i) => Math.round(v+(c2[i]-v)*f));
-    let col = mix(healthyRgb, hypoxicRgb, hypoxiaF*0.95);
-    col = mix(col, redRgb, bleedF*0.98);
-    const healthGlow = Math.max(0, 1-hypoxiaF-bleedF);
-    const glowPulse  = (Math.sin(Date.now()/400)*0.2+0.8)*healthGlow;
-    if (healthGlow > 0.05) {
-      const grd = ctx.createRadialGradient(0,0,0,0,0,75);
-      grd.addColorStop(0,   `rgba(183,228,199,${(0.7*glowPulse).toFixed(3)})`);
-      grd.addColorStop(0.5, `rgba(183,228,199,${(0.3*glowPulse).toFixed(3)})`);
-      grd.addColorStop(1,   'rgba(183,228,199,0)');
-      ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(0,0,80,0,Math.PI*2); ctx.fill();
-    }
-    ctx.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
-    const drawLobe = side => {
-      ctx.beginPath(); ctx.moveTo(side*2,35); ctx.bezierCurveTo(side*30,35,side*30,-35,side*2,-35); ctx.bezierCurveTo(side*-10,-35,side*-10,35,side*2,35); ctx.fill();
-      if (healthGlow > 0.2) { ctx.lineWidth=4; ctx.strokeStyle=`rgba(255,255,255,${(0.4*glowPulse).toFixed(3)})`; ctx.stroke(); }
-      ctx.lineWidth=1; ctx.strokeStyle=`rgba(0,0,0,${(0.05+bleedF*0.2).toFixed(3)})`; ctx.stroke();
-    };
-    drawLobe(1); drawLobe(-1); ctx.restore();
   }
 
   setMode('traditional');
@@ -436,26 +427,36 @@ function hexToRgba(hex, alpha) {
 })();
 
 /* ══════════════════════════════════════════════════════
-   DEMO 4 — ENZYME CAP DOMAIN: Conformational Control
+   DEMO 4 — ENZYME CAP DOMAIN: SVG catalytic cycle
 ══════════════════════════════════════════════════════ */
 (function(){
-  const canvas = document.getElementById('enzymeCanvas');
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d'), W = canvas.width, H = canvas.height;
-  const btn = document.getElementById('enzymeToggle');
-  let ligand = false, cap = 0, anim = 0;
-  function draw(){
-    ctx.fillStyle = '#0F1722'; ctx.fillRect(0,0,W,H);
-    ctx.beginPath(); ctx.ellipse(W/2, H/2+10, 52, 44, 0, 0, Math.PI*2); ctx.fillStyle = '#121B26'; ctx.fill();
-    const angle = -0.4 + (0.95 - (-0.4)) * cap;
-    ctx.beginPath(); ctx.moveTo(W/2-20, H/2-16); ctx.lineTo(W/2-20 + Math.cos(angle)*60, H/2-16 + Math.sin(angle)*60); ctx.strokeStyle = '#E8ECF0'; ctx.lineWidth = 5; ctx.stroke();
-    if(ligand || anim > 0) {
-      const lx = W-40 + (W/2+30 - (W-40)) * cap, ly = 40 + (H/2-60 - 40) * cap;
-      ctx.beginPath(); ctx.arc(lx, ly, 9, 0, Math.PI*2); ctx.fillStyle = '#3DD9C0'; ctx.fill();
-    }
-    cap = Math.max(0, Math.min(1, cap + anim * 0.02));
-    requestAnimationFrame(draw);
-  }
-  btn.addEventListener('click', () => { ligand = !ligand; anim = ligand ? 1 : -1; btn.textContent = ligand ? 'Remove Signal' : 'Add Signal'; });
-  draw();
+  const svgEl = document.getElementById('enzyme-svg');
+  if (!svgEl) return;
+  const btn = document.getElementById('enzymeCycleBtn');
+  const statusLabel = document.getElementById('enzymeStatusLabel');
+  if (!btn || !statusLabel) return;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    statusLabel.textContent = 'Binding: Substrate enters pocket';
+    svgEl.className.baseVal = 'stage-2';
+    await sleep(900);
+    statusLabel.textContent = 'Closed: Active site sealed';
+    svgEl.className.baseVal = 'stage-3';
+    await sleep(900);
+    statusLabel.textContent = 'Reaction: Conversion to product';
+    svgEl.className.baseVal = 'stage-4';
+    await sleep(900);
+    statusLabel.textContent = 'Opening: Cap rotates to release';
+    svgEl.className.baseVal = 'stage-5';
+    await sleep(900);
+    statusLabel.textContent = 'Release: Product unbinds';
+    svgEl.className.baseVal = 'stage-6';
+    await sleep(900);
+    svgEl.className.baseVal = 'stage-reset';
+    await sleep(50);
+    svgEl.className.baseVal = 'stage-1';
+    statusLabel.textContent = 'Apo state — active site open';
+    btn.disabled = false;
+  });
 })();
