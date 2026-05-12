@@ -273,13 +273,25 @@ footer p { font-family:var(--mono); font-size:0.68rem; color:var(--muted); }
 
 /* RESPONSIVE (mobile) */
 @media(max-width:960px){
-  nav{padding:1rem 1.75rem;} .nav-links{gap:1.25rem;}
-  .hero{grid-template-columns:1fr; min-height:auto;}
-  .hero-left{padding:7.5rem 1.75rem 4rem; min-height:auto; border-right:none; border-bottom:1px solid var(--border);}
-  .hero-right{padding:3rem 1.75rem 4rem;}
-  .section-wrap{padding:4rem 1.5rem;}
-  .project-split{grid-template-columns:1fr;}
-  .tiers{grid-template-columns:1fr;}
-  .links-grid{grid-template-columns:1fr;}
-  footer{padding:1.5rem 1.75rem;flex-direction:column;gap:0.4rem;text-align:center;}
+  nav { padding:1rem 1.75rem; }
+  .nav-links { gap:1.25rem; }
+
+  .hero { grid-template-columns:1fr; min-height:auto; }
+  .hero-left { padding:7.5rem 1.75rem 3rem; min-height:auto; border-right:none; border-bottom:1px solid var(--border); justify-content:flex-start; gap:1.5rem; }
+  .hero-right { padding:3rem 1.75rem 3.5rem; justify-content:flex-start; gap:2.5rem; }
+
+  /* hide headshot — it's absolutely positioned at 380px and would overflow */
+  .hero-headshot { display:none; }
+
+  /* these max-widths use calc(100% - 420px) which goes negative on phones */
+  .hero-sub { max-width:100%; }
+  .credentials { max-width:100%; }
+
+  h1 { font-size:clamp(2.8rem,10vw,4rem); }
+
+  .section-wrap { padding:3.5rem 1.5rem; }
+  .project-split { grid-template-columns:1fr; }
+  .tiers { grid-template-columns:1fr; }
+  .links-grid { grid-template-columns:1fr; }
+  footer { padding:1.5rem 1.75rem; flex-direction:column; gap:0.4rem; text-align:center; }
 }
