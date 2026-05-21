@@ -55,7 +55,7 @@ function hexToRgba(hex, alpha) {
 
   holdBtn.addEventListener('mousedown',  e => { e.preventDefault(); setHeld(true); });
   document.addEventListener('mouseup',   () => { if (held) setHeld(false); });
-  holdBtn.addEventListener('touchstart', e => { e.preventDefault(); setHeld(true); });
+  holdBtn.addEventListener('touchstart', e => { e.preventDefault(); setHeld(true); }, { passive: false });
   document.addEventListener('touchend',  () => { if (held) setHeld(false); });
   canvas.addEventListener('mousedown',   e => { e.preventDefault(); setHeld(true); });
   canvas.addEventListener('touchstart',  e => { e.preventDefault(); setHeld(true); }, { passive: false });
@@ -262,7 +262,7 @@ function hexToRgba(hex, alpha) {
     ctx.fillStyle = `rgba(61,217,192,${srcAlpha.toFixed(3)})`; ctx.fill();
   }
 
-  function drawHumanSilhouette(cx, cy, scale, urgency) {
+  function drawHumanSilhouette(cx, cy, _scale, urgency) {
     const fs = 0.48;
     ctx.save();
     ctx.translate(cx - fs * 325, cy - fs * 450 + 28);
